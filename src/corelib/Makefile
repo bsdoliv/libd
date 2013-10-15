@@ -1,0 +1,14 @@
+.include <bsd.own.mk>
+
+.include "../Makefile.inc"
+.include "${ABSTOP}/mk/cpp.mk"
+
+CXXFLAGS+=	-std=c++0x
+LDSTATIC= 	-static
+LIB=		dcore
+
+SRCS+= daemon.cpp httpdaemon.cpp
+
+.include <bsd.lib.mk>
+
+# vim: set ft=make ts=8 sw=8 noet:
