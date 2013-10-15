@@ -1,7 +1,6 @@
 #ifndef DAEMON_H
 #define DAEMON_H
 
-#include <libuv/uv.h>
 #include <string>
 
 #include "dglobal.h"

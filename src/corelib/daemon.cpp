@@ -1,7 +1,7 @@
 #include "daemon.h"
+#include "uv.h"
 
 #include <iostream>
-
 #include <assert.h>
 
 D_BEGIN_NAMESPACE

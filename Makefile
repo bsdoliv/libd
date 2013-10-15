@@ -1,7 +1,7 @@
 .include "Makefile.inc"
 
 distrib: .PHONY
-	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${INCLUDEDIR}/libuv/uv-private
+	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
 
 distclean clean: .PHONY
 	rm -rfv ${BINDIR} ${LIBDIR} ${INCLUDEDIR}

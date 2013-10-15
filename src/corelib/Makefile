@@ -7,6 +7,7 @@
 
 CXXFLAGS+=	-std=c++0x
 CXXFLAGS+=	-I${INCLUDEDIR}
+CXXFLAGS+=	-I${ABSTOP}/contrib/libuv/include
 CXXFLAGS+=	-ggdb3
 LDSTATIC= 	-static
 LIB=		dcore
