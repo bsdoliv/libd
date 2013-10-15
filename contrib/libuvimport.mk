@@ -1,3 +1,5 @@
+LIBUV_RELEASE=0.11.1
+
 all: 
 	@echo "try ${.MAKE} patch"
 
