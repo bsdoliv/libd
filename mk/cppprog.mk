@@ -3,6 +3,8 @@ CPPPROG_MK=
 
 NOGCCERROR= 	1 # removes -Werror
 
+CC=${CXX}
+
 CXXFLAGS+= -pipe -fPIC -Wall 
 CXXFLAGS+= -pthread 
 #CPPFLAGS+= -I${ABSTOP}
@@ -17,17 +19,17 @@ LDADD+= -L${ABSTOP}/build/lib
 
 .SUFFIXES: .d
 .cpp.d:
-    ${CXX} -M ${CXXFLAGS} ${CPPFLAGS} ${.IMPSRC} | \
-    sed 's!\.o[ :]*!.o : ${.TARGET} !' > ${.TARGET}
+	${CXX} -M ${CXXFLAGS} ${CPPFLAGS} ${.IMPSRC} | \
+	sed 's!\.o[ :]*!.o : ${.TARGET} !' > ${.TARGET}
 
 DFILES= ${SRCS:T:S/.cpp/.d/}
 CLEANFILES+= ${DFILES} .depend_local
 
 .depend_local: ${DFILES}
 .if empty(${DFILES})
-    echo > ${.TARGET}
+	echo > ${.TARGET}
 .else
-    cat ${.ALLSRC} > ${.TARGET}
+	cat ${.ALLSRC} > ${.TARGET}
 .endif
 
 .-include ".depend_local"
@@ -35,7 +37,7 @@ CLEANFILES+= ${DFILES} .depend_local
 .if !exists(.depend_local)
 .ifnmake distclean && cleandir && clean
 .BEGIN: .depend_local
-    @${.MAKE}
+	@${.MAKE}
 .endif
 .endif
 
@@ -45,6 +47,5 @@ CLEANFILES+= ${DFILES} .depend_local
 .endif
 .endif
 
-
-
 .endif # !CPPPROG_MK
+# vim: set ft=make ts=8 sw=8 noet:
