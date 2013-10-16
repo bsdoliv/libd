@@ -19,7 +19,7 @@ FILESDIR= 	${INCLUDEDIR}/libuv/uv-private
 
 build: .PHONY all
 
-all distclean clean: .PHONY uv.h
+all distclean clean: .PHONY
 	${GMAKE} -f ${.CURDIR}/GNUmakefile ${.TARGET}
 
 cleandir: .PHONY
