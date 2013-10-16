@@ -1,2 +1,4 @@
+httpd
 .depend_local
 *.o
+**.swp

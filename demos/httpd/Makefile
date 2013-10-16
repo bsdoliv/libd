@@ -4,6 +4,8 @@
 
 PROG=		httpd
 CPPFLAGS+=	-I${INCLUDEDIR}
+CPPFLAGS+=	-ggdb3
+LDADD+=		${LIBDIR}/libuv.a -pthread
 SRCS+=		main.cpp httpd.cpp
 
 .include <bsd.prog.mk>
