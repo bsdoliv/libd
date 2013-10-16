@@ -1,3 +1,4 @@
 daemon.o
 httpdaemon.o
 libdcore.a
+**.swp
