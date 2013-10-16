@@ -17,12 +17,6 @@ FILES+=			include/uv-private/tree.h \
 			include/uv-private/uv-unix.h
 FILESDIR= 	${INCLUDEDIR}/libuv/uv-private
 
-#libuv.a: build
-
-uv.h: include/uv.h
-	cp ${.ALLSRC} ${.TARGET}
-#	cp include/uv-private ${.TARGET}
-
 build: .PHONY all
 
 all distclean clean: .PHONY uv.h
