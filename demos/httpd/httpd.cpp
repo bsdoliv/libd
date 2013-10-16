@@ -1,5 +1,5 @@
-int
-main(int argc, char **argv)
-{
-    return 0;
-}
+#include "httpd.h"
+
+Httpd::Httpd() : Daemon() { }
+
+Httpd::~Httpd() { }
