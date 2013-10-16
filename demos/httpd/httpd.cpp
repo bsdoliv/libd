@@ -13,6 +13,6 @@ void Httpd::run()
 void Httpd::handleRequest(const std::string &request, std::string *reply)
 {
     std::cout << "Master I'm here to serve you" << std::endl;
-    std::cout << "Request: " << request;
+    std::cout << "Request: " << request << std::endl;
     reply->assign("OK\n");
 }

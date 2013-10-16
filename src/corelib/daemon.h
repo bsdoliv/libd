@@ -20,6 +20,7 @@ public:
 
 private:
     DaemonPrivate *d;
+    friend DaemonPrivate;
 };
 
 D_END_NAMESPACE

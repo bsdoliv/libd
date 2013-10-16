@@ -12,7 +12,7 @@ CXXFLAGS+=	-ggdb3
 LDSTATIC= 	-static
 LIB=		dcore
 
-SRCS+= daemon.cpp httpdaemon.cpp
+SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp
 
 FILES= dglobal.h
 FILES+= Daemon daemon.h
