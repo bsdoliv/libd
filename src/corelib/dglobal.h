@@ -6,4 +6,8 @@
 #define D_BEGIN_NAMESPACE namespace D_NAMESPACE {
 #define D_END_NAMESPACE }
 
+namespace D_NAMESPACE {}
+
+D_USE_NAMESPACE
+
 #endif // ! DGLOBAL_H
