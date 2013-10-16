@@ -1,9 +1,12 @@
 .include "Makefile.inc"
 
 distrib: .PHONY
-	mkdir -p ${BINDIR} ${LIBDIR}
+	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
 
-distclean: .PHONY
-	rm -rfv ./obj
+distclean clean: .PHONY
+	rm -rfv ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
+
+SUBDIR= demos/httpd src/corelib
+.include <bsd.subdir.mk>
 
 # vim: set ft=make ts=8 sw=8 noet:

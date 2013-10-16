@@ -15,7 +15,6 @@ CXXFLAGS+= -pthread
 # -lthrift -lfb303 -lmemcached -lssl -lrt -lcrypto -lwajam-nlp
 
 LDADD+= -lpthread 
-LDADD+= -L${ABSTOP}/build/lib
 
 .SUFFIXES: .d
 .cpp.d:
