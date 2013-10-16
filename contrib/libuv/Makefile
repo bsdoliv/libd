@@ -2,15 +2,35 @@
 .include "../Makefile.inc"
 .include "${ABSTOP}/mk/cpp.mk"
 
-LDSTATIC=	-static
-LIB=		uv
+FILES= 			libuv.a
+FILESMODE_libuv.a= 	600
+FILESDIR_libuv.a=	${LIBDIR}
+
+FILES+=			include/uv.h
+FILESDIR_include/uv.h= 	${INCLUDEDIR}/libuv
+
+FILES+=			include/uv-private/tree.h \
+			include/uv-private/uv-bsd.h \
+			include/uv-private/uv-darwin.h \
+			include/uv-private/uv-linux.h \
+			include/uv-private/uv-sunos.h \
+			include/uv-private/uv-unix.h
+FILESDIR= 	${INCLUDEDIR}/libuv/uv-private
+
+#libuv.a: build
+
+uv.h: include/uv.h
+	cp ${.ALLSRC} ${.TARGET}
+#	cp include/uv-private ${.TARGET}
+
+build: .PHONY all
+
+all distclean clean: .PHONY uv.h
+	${GMAKE} -f ${.CURDIR}/GNUmakefile ${.TARGET}
 
 cleandir: .PHONY
 	${GMAKE} -f ${.CURDIR}/GNUmakefile distclean
 
-.include <bsd.lib.mk>
-
-all build distclean clean: .PHONY
-	${GMAKE} -f ${.CURDIR}/GNUmakefile ${.TARGET}
+.include <bsd.files.mk>
 
 # vim: set ft=make ts=8 sw=8 noet:

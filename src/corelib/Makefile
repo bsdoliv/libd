@@ -6,6 +6,7 @@
 .include "${ABSTOP}/mk/include.mk"
 
 CXXFLAGS+=	-std=c++0x
+CXXFLAGS+=	-I${INCLUDEDIR}
 LDSTATIC= 	-static
 LIB=		dcore
 

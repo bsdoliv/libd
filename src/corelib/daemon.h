@@ -10,6 +10,7 @@ class Daemon
 public:
     Daemon();
     virtual ~Daemon();
+    int exec();
 };
 
 D_END_NAMESPACE

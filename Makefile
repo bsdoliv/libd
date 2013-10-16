@@ -1,10 +1,12 @@
 .include "Makefile.inc"
 
 distrib: .PHONY
-	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
+	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${INCLUDEDIR}/libuv/uv-private
 
 distclean clean: .PHONY
 	rm -rfv ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
+
+install: distrib
 
 SUBDIR= contrib/libuv src/corelib
 .include <bsd.subdir.mk>
