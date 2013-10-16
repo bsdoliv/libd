@@ -14,7 +14,7 @@ CXXFLAGS+= -pthread
 #CPPFLAGS+= -I/usr/include/thrift -I/usr/include/thrift/fb303
 # -lthrift -lfb303 -lmemcached -lssl -lrt -lcrypto -lwajam-nlp
 
-LDADD+= -lpthread 
+LDADD+= -pthread 
 
 .SUFFIXES: .d
 .cpp.d:
