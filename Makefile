@@ -6,7 +6,7 @@ distrib: .PHONY
 distclean clean: .PHONY
 	rm -rfv ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
 
-SUBDIR= demos/httpd src/corelib
+SUBDIR= contrib/libuv src/corelib
 .include <bsd.subdir.mk>
 
 # vim: set ft=make ts=8 sw=8 noet:
