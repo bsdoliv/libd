@@ -6,7 +6,9 @@ distrib: .PHONY
 distclean clean: .PHONY
 	rm -rfv ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
 
-install: distrib
+install: .PHONY distrib
+
+regress: .PHONY distrib all install
 
 SUBDIR= contrib/libuv src/corelib
 .include <bsd.subdir.mk>

@@ -7,6 +7,8 @@
 D_BEGIN_NAMESPACE
 
 static Daemon *parent = 0;
+static uv_mutex_t hr_mtx;
+
 struct DaemonPrivate {
     uv_tcp_t server;
 
@@ -66,6 +68,7 @@ DaemonPrivate::handleAccept(uv_stream_t *server, int status)
     uv_tcp_t *client = (uv_tcp_t *)::malloc(sizeof(uv_tcp_t));
     ::uv_tcp_init(::uv_default_loop(), client);
     if (::uv_accept(server, (uv_stream_t *)client) == 0) {
+//        ::uv_queue_work(::uv_default_loop(), 
         ::uv_read_start((uv_stream_t *)client, &DaemonPrivate::alloc_buffer,
                         &DaemonPrivate::handleRequest);
     } else {
@@ -91,8 +94,10 @@ DaemonPrivate::handleRequest(uv_stream_t *server, ssize_t nread, uv_buf_t buf)
         return;
     }
 
+    uv_mutex_lock(&hr_mtx);
+
     std::cout << "Bytes read: " << nread << std::endl;
-    std::cout << "Buffer: " << buf.base << std::endl;
+//    std::cout << "Buffer: " << buf.base << std::endl;
 
     std::string reply;
     // process request
@@ -111,6 +116,8 @@ DaemonPrivate::handleRequest(uv_stream_t *server, ssize_t nread, uv_buf_t buf)
     std::cout << "Bytes written: " << reply.size() << std::endl;
 
     ::uv_close((uv_handle_t *) server, NULL);
+
+    uv_mutex_unlock(&hr_mtx);
 }
 
 D_END_NAMESPACE
