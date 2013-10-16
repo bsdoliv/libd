@@ -9,7 +9,7 @@ public:
     Httpd();
     virtual ~Httpd();
     void run();
-    void handleRequest(uv_stream_t *, ssize_t, uv_buf_t);
+    void handleRequest(const std::string &request, std::string *reply);
 };
 
 #endif // !HTTPD_H

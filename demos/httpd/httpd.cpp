@@ -10,7 +10,9 @@ void Httpd::run()
     std::cout << "Starting..." << std::endl;
 }
 
-void Httpd::handleRequest(uv_stream_t *, ssize_t, uv_buf_t)
+void Httpd::handleRequest(const std::string &request, std::string *reply)
 {
     std::cout << "Master I'm here to serve you" << std::endl;
+    std::cout << "Request: " << request;
+    reply->assign("OK\n");
 }
