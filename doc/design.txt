@@ -1,9 +1,15 @@
-Design, Resources and Misc Notes
-
 libd Features
-    - reactor pattern (wrapper over libevent or eventmachine)
+    wip - reactor pattern (wrapper over libevent or eventmachine)
         . timers
-    - asynchronous TCP/UDP comprehensible API
+    wip - libuv embedded into libd
+    - daemon/service facilities
+        http://git.0pointer.de/?p=libdaemon.git
+        http://0pointer.de/lennart/projects/libdaemon/
+    - bytearray, strings
+    - warning/debug/info facilities
+    - TCP comprehensible API
+    - web.py basic api
+    - UDP comprehensible API
     - log facilities (varnish)
     - metrics collection facilities (varnish)
         . time measuring (QTime)

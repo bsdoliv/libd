@@ -3,6 +3,7 @@
 .include "../Makefile.inc"
 .include "${ABSTOP}/mk/cpp.mk"
 .include "${ABSTOP}/mk/include.mk"
+.include "${ABSTOP}/contrib/qtbase/qt.mk"
 
 CXXFLAGS+=	-std=c++0x
 CXXFLAGS+=	-I${ABSTOP}/contrib/libuv/include
