@@ -1,12 +1,10 @@
 .include <bsd.own.mk>
-.include <bsd.sys.mk>
 
 .include "../Makefile.inc"
 .include "${ABSTOP}/mk/cpp.mk"
 .include "${ABSTOP}/mk/include.mk"
 
 CXXFLAGS+=	-std=c++0x
-CXXFLAGS+=	-I${INCLUDEDIR}
 CXXFLAGS+=	-I${ABSTOP}/contrib/libuv/include
 CXXFLAGS+=	-ggdb3
 LDSTATIC= 	-static
