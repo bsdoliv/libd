@@ -7,10 +7,10 @@ strongly relies on libuv[1] in it's core.
 
 In the API level, you'll find a way to build C++ webservices with the same look
 and feel of web.py[2], or TCP-servers with the same look and feel of
-twisted[3]. But, under-the-hood instead of "boostisms" and workarounds to cope
-with cross-platform issues (aka windows), libd is implemented to take maximum
-profit of resources broadly available at an underlying Unix-like operating
-system.
+twisted[3], meanwhile under-the-hood, instead of "boostisms" and workarounds to
+cope with cross-platform issues (aka windows), libd is implemented to take
+maximum profit of resources broadly available at an underlying Unix-like
+operating system.
 
 Bootstrapping
 =============
