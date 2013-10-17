@@ -1,0 +1,97 @@
+Design, Resources and Misc Notes
+
+libd Features
+    - reactor pattern (wrapper over libevent or eventmachine)
+        . timers
+    - asynchronous TCP/UDP comprehensible API
+    - log facilities (varnish)
+    - metrics collection facilities (varnish)
+        . time measuring (QTime)
+    - IPC
+        . shared memory
+    - data structures
+        . hash (wrapper over sparsehash)
+        . caching (qcache)
+        . ibuf (openbsd)
+        . queues (openbsd)
+    - configuration loading
+    - encoding (QUrl)
+    - parsing
+        . json
+        . xml (json_spirt or qt code)
+    - networking clients/wrappers
+        . http (libcurl or libfetch)
+        . graphite
+        . scribe
+        . protobuf
+        . hiredis
+        . ssl
+    - I/O and filesystem access
+        . file/directories/info (code from qt, or boost)
+
+Misc Resources
+    * design: scalability
+        * On Designing and Deploying Internet-Scale Services
+        https://www.usenix.org/legacy/event/lisa07/tech/full_papers/hamilton/hamilton_html/
+        * Designs, Lessons and Advice from Building Large Distributed Systems (Google)
+        http://odbms.org/download/dean-keynote-ladis2009.pdf
+
+    * design: unix
+        http://phk.freebsd.dk/pubs/varnish_tech.pdf
+
+    * design: concurrent I/O and throughput
+        http://www.ietf.org/proceedings/84/slides/slides-84-tsvarea-4.pdf
+        https://gettys.wordpress.com/2013/07/10/low-latency-requires-smart-queuing-traditional-aqm-is-not-enough/
+
+        * c10k
+        http://www.kegel.com/c10k.html#strategies
+        * no threads no callbacks
+        http://lanyrd.com/2010/oscon/scbtcz/
+
+        * Building blocks of a scalable web crawler
+        http://blog.marc-seeger.de/assets/papers/thesis_seeger-building_blocks_of_a_scalable_webcrawler.pdf
+
+        * event-machine based stuff
+        http://www.slideshare.net/zhesto/eventmachine
+        http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/
+        http://www.igvita.com/2009/05/13/fibers-cooperative-scheduling-in-ruby/
+        http://www.oscon.com/oscon2010/public/schedule/detail/13709
+        https://github.com/eventmachine/eventmachine/wiki/EventMachine-and-CPP
+
+        * gcd
+        https://developer.apple.com/library/mac/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40008091
+
+    * design: message queue
+        resources/introduction_to_message_queue.pdf
+
+    * design: monitoring
+        * Lightweight, High-Resolution Monitoring for Troubleshooting Production Systems
+        http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//pubs/archive/34840.pdf
+
+    * latency
+        * (netbsd && rump)
+        http://blog.netbsd.org/tnf/entry/running_applications_on_the_xen
+
+    * libfetch
+        http://svnweb.freebsd.org/base/head/lib/libfetch/
+
+    * RESTful API design
+        http://webpy.org/docs/0.3/api
+
+    * tokyo cabinet, as a backend for a hash database
+        http://fallabs.com/tokyocabinet/spex-en.html#tchdbapi
+
+    * memory allocators
+        - tcmalloc
+        http://goog-perftools.sourceforge.net/doc/tcmalloc.html
+        - jemalloc
+        http://www.canonware.com/download/jemalloc/jemalloc-latest/doc/jemalloc.html
+
+    * libuv
+        http://nikhilm.github.io/uvbook/
+        https://github.com/racker/libuv
+
+    * async-io demos
+        http://0pointer.de/lennart/projects/libasyncns/doxygen/
+
+# vim: set ts=4 sw=4 et:
