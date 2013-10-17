@@ -106,7 +106,7 @@ Daemon::exec()
         return r;
     }
 
-//    uv_tcp_simultaneous_accepts(&d->server, 1);
+    uv_tcp_simultaneous_accepts(&d->server, 1);
 
     std::cout << "Listening on " << 8080 << std::endl;
     return uv_run(loop, UV_RUN_DEFAULT);
@@ -153,7 +153,6 @@ DaemonPrivate::alloc_buffer(uv_handle_t *handle, size_t suggested_size)
 void
 DaemonPrivate::read_socket(uv_stream_t *server, ssize_t nread, uv_buf_t buf)
 {
-//    TaskData *td = (TaskData *)req->data;
     if (nread == -1) {
         std::cout << "Buffer crappy" << std::endl;
         uv_close((uv_handle_t *) server, NULL);
