@@ -6,20 +6,32 @@ daemons/services in C++, focusing on clear and comprehensible API, which
 strongly relies on libuv[1] in it's core.
 
 In the API level, you'll find a way to build C++ webservices with the same look
-and feel of web.py[1], or TCP-servers with the same look and feel of
-twisted[2]. But, in the under-the-hood instead of "boostisms" and workarounds
-to cope with cross-platform issues (aka windows), libd implementation aims to
-take maximum profit of resources broadly available at an underlying Unix-like
-operating-system.
+and feel of web.py[2], or TCP-servers with the same look and feel of
+twisted[3]. But, under-the-hood instead of "boostisms" and workarounds to cope
+with cross-platform issues (aka windows), libd is implemented to take maximum
+profit of resources broadly available at an underlying Unix-like operating
+system.
 
-Installation
-============
+Bootstrapping
+========
 
-    % bmake -j 2
+    % tools/bmakebuild.sh
+    % alias bmake=~/.opt/bmake/bin/bmake
+
+Building
+========
+
+    % bmake regress
     % DESTDIR=/opt/libd bmake install
 
+Demo
+===
+
+    % cd demos/httpd && bmake
+
 References:
-[1]
-[2]
+[1] https://github.com/joyent/libuv/
+[2] http://webpy.org/
+[3] http://twistedmatrix.com
 
 # vim: set ts=4 sw=4 et:
