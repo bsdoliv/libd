@@ -18,19 +18,15 @@ mk:
 	mkdir -p ${.TARGET}
 
 .for _mk in ${PATCH_BUILD}
-.PHONY: patch-build
-patch-build: mk/${_mk}
+patch-build: .PHONY mk/${_mk}
 mk/${_mk}: mk ${_mk}
 	sed "s:^include \$$(SRCDIR)/:include \$$(SRCDIR)/mk/:g" < ${.ALLSRC} > ${.TARGET}
-#	@mv -v ${_mk} ${.TARGET}
 .endfor
 
-.PHONY: clean-files
-clean-files:
+clean-files: .PHONY
 	rm -fv ${CLEAN_FILES}
 
-.PHONY: patch-makefile
-patch-makefile: GNUmakefile
+patch-makefile: .PHONY GNUmakefile
 
 GNUmakefile: Makefile
 	sed "s:^include \$$(SRCDIR)/build.mk:include \$$(SRCDIR)/mk/build.mk:g" < ${.ALLSRC} > .${.TARGET}
