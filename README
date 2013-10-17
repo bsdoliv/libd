@@ -27,6 +27,7 @@ Demo
 ====
 
     % cd demos/httpd && bmake
+    % ./httpd
 
 Installing
 ==========
