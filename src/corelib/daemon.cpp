@@ -17,7 +17,7 @@ struct TaskData {
     int id;
     uv_buf_t buf;
     ssize_t bufsize;
-    uv_stream_t *server;
+    uv_stream_t *client;
 };
 
 struct DaemonPrivate {
@@ -28,18 +28,16 @@ struct DaemonPrivate {
     TaskData databucket[MAXTASKS];
 
     static uv_buf_t alloc_buffer(uv_handle_t *handle, size_t suggested_size);
-    static void handleAccept(uv_stream_t *, int);
-    static void handleRequest(uv_stream_t *, ssize_t, uv_buf_t);
+    static void handle_accept(uv_stream_t *, int);
+    static void read_socket(uv_stream_t *, ssize_t, uv_buf_t);
 
-    void spawnRequestHandlerTask(uv_stream_t *server, ssize_t nread, uv_buf_t buf);
+    void spawnRequestHandlerTask(uv_stream_t *client);
     static void requestHandlerTask(uv_work_t *req);
     static void taskFinished(uv_work_t *req, int status);
 };
 
 void 
-DaemonPrivate::spawnRequestHandlerTask(uv_stream_t *server,
-                                       ssize_t nread,
-                                       uv_buf_t buf)
+DaemonPrivate::spawnRequestHandlerTask(uv_stream_t *client)
 {
     uvMutexLocker(&parent->d->mtx);
     ++parent->d->curtask;
@@ -47,15 +45,14 @@ DaemonPrivate::spawnRequestHandlerTask(uv_stream_t *server,
     TaskData *td = &databucket[parent->d->curtask];
     memset(td, 0x0, sizeof(*td));
     td->id = parent->d->curtask;
-    td->buf = buf;
-    td->bufsize = nread;
-    td->server = server;
+    td->client = client;
     req[parent->d->curtask].data = (void *)td;
 
     uv_queue_work(uv_default_loop(), 
                     &req[parent->d->curtask],
                     requestHandlerTask,
                     taskFinished);
+
     std::cout << "Task spawned: " << td->id << std::endl;
 }
 
@@ -73,35 +70,9 @@ void
 DaemonPrivate::requestHandlerTask(uv_work_t *req)
 {
     TaskData *td = (TaskData *)req->data;
-    if (td->bufsize == -1) {
-        std::cout << "Buffer crappy" << std::endl;
-        uv_close((uv_handle_t *) td->server, NULL);
-        free(td->buf.base);
-        return;
-    }
-
-#if 0
-    std::cout << "Bytes read: " << nread << std::endl;
-    std::cout << "Buffer: " << buf.base << std::endl;
-#endif
-
-    std::string reply;
-    // process request
-    parent->handleRequest(std::string(td->buf.base), &reply);
-
-    free(td->buf.base);
-    uv_read_stop(td->server);
-
-    // prepare answer
-    uv_write_t ans;
-    uv_buf_t ansbuf;
-    ansbuf.base = const_cast<char *>(reply.c_str());
-    ansbuf.len = reply.size();
-
-    int r = uv_write(&ans, td->server, &ansbuf, reply.size(), NULL);
-    std::cout << "Bytes written: " << reply.size() << std::endl;
-
-    uv_close((uv_handle_t *) td->server, NULL);
+    uv_read_start((uv_stream_t *)td->client,
+                  &DaemonPrivate::alloc_buffer,
+                  &DaemonPrivate::read_socket);
 }
 
 Daemon::Daemon() :
@@ -128,7 +99,7 @@ Daemon::exec()
     struct sockaddr_in bind_addr = uv_ip4_addr("0.0.0.0", 8080);
     uv_tcp_bind(&d->server, bind_addr);
 
-    int r = uv_listen((uv_stream_t *)&d->server, 128, &DaemonPrivate::handleAccept);
+    int r = uv_listen((uv_stream_t *)&d->server, 128, &DaemonPrivate::handle_accept);
     if (r != 0) {
         std::cout << "Listen error " << ::uv_err_name(uv_last_error(loop)) 
             << std::endl;
@@ -142,7 +113,7 @@ Daemon::exec()
 }
 
 void
-DaemonPrivate::handleAccept(uv_stream_t *server, int status)
+DaemonPrivate::handle_accept(uv_stream_t *server, int status)
 {
     assert(server);
     if (parent->d->curtask >= MAXTASKS) {
@@ -164,11 +135,10 @@ DaemonPrivate::handleAccept(uv_stream_t *server, int status)
     uv_tcp_init(uv_default_loop(), client);
     if (uv_accept((uv_stream_t *)&parent->d->server,
                   (uv_stream_t *)client) == 0) {
-        uv_read_start((uv_stream_t *)client,
-                      &DaemonPrivate::alloc_buffer,
-                      &DaemonPrivate::handleRequest);
+        parent->d->spawnRequestHandlerTask((uv_stream_t *)client);
     } else {
         uv_close((uv_handle_t *)client, NULL);
+        return;
     }
 
     std::cout << "Connection accepted" << std::endl;
@@ -181,9 +151,38 @@ DaemonPrivate::alloc_buffer(uv_handle_t *handle, size_t suggested_size)
 }
 
 void
-DaemonPrivate::handleRequest(uv_stream_t *server, ssize_t nread, uv_buf_t buf)
+DaemonPrivate::read_socket(uv_stream_t *server, ssize_t nread, uv_buf_t buf)
 {
-    parent->d->spawnRequestHandlerTask(server, nread, buf);
+//    TaskData *td = (TaskData *)req->data;
+    if (nread == -1) {
+        std::cout << "Buffer crappy" << std::endl;
+        uv_close((uv_handle_t *) server, NULL);
+        free(buf.base);
+        return;
+    }
+
+#if 0
+    std::cout << "Bytes read: " << nread << std::endl;
+    std::cout << "Buffer: " << buf.base << std::endl;
+#endif
+
+    free(buf.base);
+    uv_read_stop(server);
+
+    std::string reply;
+    // process request
+    parent->handleRequest(std::string(buf.base), &reply);
+
+    // prepare answer
+    uv_write_t ans;
+    uv_buf_t ansbuf;
+    ansbuf.base = const_cast<char *>(reply.c_str());
+    ansbuf.len = reply.size();
+
+    int r = uv_write(&ans, server, &ansbuf, reply.size(), NULL);
+    std::cout << "Bytes written: " << reply.size() << std::endl;
+
+    uv_close((uv_handle_t *) server, NULL);
 }
 
 D_END_NAMESPACE
