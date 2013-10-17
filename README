@@ -13,7 +13,7 @@ profit of resources broadly available at an underlying Unix-like operating
 system.
 
 Bootstrapping
-========
+============
 
     % tools/bmakebuild.sh
     % alias bmake=~/.opt/bmake/bin/bmake
