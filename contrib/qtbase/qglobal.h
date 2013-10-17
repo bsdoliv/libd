@@ -45,11 +45,11 @@
 
 #include <stddef.h>
 
-#define QT_VERSION_STR   "5.2.0"
+#define QT_VERSION_STR   "5.1.1"
 /*
    QT_VERSION is (major << 16) + (minor << 8) + patch.
 */
-#define QT_VERSION 0x050200
+#define QT_VERSION 0x050101
 /*
    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 4, 0))
 */
@@ -68,14 +68,11 @@
 #define QT_STRINGIFY(x) QT_STRINGIFY2(x)
 
 #include <qsystemdetection.h>
-#include <qprocessordetection.h>
 #include <qcompilerdetection.h>
+#include <qprocessordetection.h>
 
 #if defined (__ELF__)
 #  define Q_OF_ELF
-#endif
-#if defined (__MACH__) && defined (__APPLE__)
-#  define Q_OF_MACH_O
 #endif
 
 #ifdef __cplusplus
@@ -194,10 +191,8 @@ typedef quint64 qulonglong;
 #ifndef QT_POINTER_SIZE
 #  if defined(Q_OS_WIN64)
 #   define QT_POINTER_SIZE 8
-#  elif defined(Q_OS_WIN32) || defined(Q_OS_WINCE) || defined(Q_OS_WINRT)
+#  elif defined(Q_OS_WIN32) || defined(Q_OS_WINCE)
 #   define QT_POINTER_SIZE 4
-#  elif defined(Q_OS_ANDROID)
-#   define QT_POINTER_SIZE 4 // ### Add auto-detection to Windows configure
 #  endif
 #endif
 
@@ -208,7 +203,11 @@ typedef quint64 qulonglong;
 QT_BEGIN_INCLUDE_NAMESPACE
 typedef unsigned char uchar;
 typedef unsigned short ushort;
+#if defined(Q_QDOC) || !defined(Q_OS_ANDROID)
 typedef unsigned int uint;
+#else
+# include <sys/types.h>
+#endif
 typedef unsigned long ulong;
 QT_END_INCLUDE_NAMESPACE
 
@@ -540,10 +539,6 @@ class QDataStream;
 #  define QT_NO_SYSTEMSEMAPHORE  // not needed at all in a flat address space
 #endif
 
-#if defined(Q_OS_WINRT)
-#  define QT_NO_PROCESS
-#endif
-
 inline void qt_noop(void) {}
 
 /* These wrap try/catch so we can switch off exceptions later.
@@ -656,13 +651,8 @@ template <> class QStaticAssertFailure<true> {};
 
 #define Q_STATIC_ASSERT_PRIVATE_JOIN(A, B) Q_STATIC_ASSERT_PRIVATE_JOIN_IMPL(A, B)
 #define Q_STATIC_ASSERT_PRIVATE_JOIN_IMPL(A, B) A ## B
-#ifdef __COUNTER__
-#define Q_STATIC_ASSERT(Condition) \
-    enum {Q_STATIC_ASSERT_PRIVATE_JOIN(q_static_assert_result, __COUNTER__) = sizeof(QStaticAssertFailure<!!(Condition)>)}
-#else
 #define Q_STATIC_ASSERT(Condition) \
     enum {Q_STATIC_ASSERT_PRIVATE_JOIN(q_static_assert_result, __LINE__) = sizeof(QStaticAssertFailure<!!(Condition)>)}
-#endif /* __COUNTER__ */
 #define Q_STATIC_ASSERT_X(Condition, Message) Q_STATIC_ASSERT(Condition)
 #endif
 
@@ -688,13 +678,11 @@ typedef void (*QFunctionPointer)();
 #  define Q_UNIMPLEMENTED() qWarning("%s:%d: %s: Unimplemented code.", __FILE__, __LINE__, Q_FUNC_INFO)
 #endif
 
-Q_DECL_CONSTEXPR static inline bool qFuzzyCompare(double p1, double p2) Q_REQUIRED_RESULT;
 Q_DECL_CONSTEXPR static inline bool qFuzzyCompare(double p1, double p2)
 {
     return (qAbs(p1 - p2) * 1000000000000. <= qMin(qAbs(p1), qAbs(p2)));
 }
 
-Q_DECL_CONSTEXPR static inline bool qFuzzyCompare(float p1, float p2) Q_REQUIRED_RESULT;
 Q_DECL_CONSTEXPR static inline bool qFuzzyCompare(float p1, float p2)
 {
     return (qAbs(p1 - p2) * 100000.f <= qMin(qAbs(p1), qAbs(p2)));
@@ -703,7 +691,6 @@ Q_DECL_CONSTEXPR static inline bool qFuzzyCompare(float p1, float p2)
 /*!
   \internal
 */
-Q_DECL_CONSTEXPR static inline bool qFuzzyIsNull(double d) Q_REQUIRED_RESULT;
 Q_DECL_CONSTEXPR static inline bool qFuzzyIsNull(double d)
 {
     return qAbs(d) <= 0.000000000001;
@@ -712,7 +699,6 @@ Q_DECL_CONSTEXPR static inline bool qFuzzyIsNull(double d)
 /*!
   \internal
 */
-Q_DECL_CONSTEXPR static inline bool qFuzzyIsNull(float f) Q_REQUIRED_RESULT;
 Q_DECL_CONSTEXPR static inline bool qFuzzyIsNull(float f)
 {
     return qAbs(f) <= 0.00001f;
@@ -723,7 +709,6 @@ Q_DECL_CONSTEXPR static inline bool qFuzzyIsNull(float f)
    check whether the actual value is 0 or close to 0, but whether
    it is binary 0, disregarding sign.
 */
-static inline bool qIsNull(double d) Q_REQUIRED_RESULT;
 static inline bool qIsNull(double d)
 {
     union U {
@@ -740,7 +725,6 @@ static inline bool qIsNull(double d)
    check whether the actual value is 0 or close to 0, but whether
    it is binary 0, disregarding sign.
 */
-static inline bool qIsNull(float f) Q_REQUIRED_RESULT;
 static inline bool qIsNull(float f)
 {
     union U {
@@ -997,20 +981,6 @@ namespace QtPrivate {
 template <bool B, typename T = void> struct QEnableIf;
 template <typename T> struct QEnableIf<true, T> { typedef T Type; };
 }
-
-#ifndef Q_FORWARD_DECLARE_OBJC_CLASS
-#  ifdef __OBJC__
-#    define Q_FORWARD_DECLARE_OBJC_CLASS(classname) @class classname
-#  else
-#    define Q_FORWARD_DECLARE_OBJC_CLASS(classname) typedef struct objc_object classname
-#  endif
-#endif
-#ifndef Q_FORWARD_DECLARE_CF_TYPE
-#  define Q_FORWARD_DECLARE_CF_TYPE(type) typedef const struct __ ## type * type ## Ref
-#endif
-#ifndef Q_FORWARD_DECLARE_MUTABLE_CF_TYPE
-#  define Q_FORWARD_DECLARE_MUTABLE_CF_TYPE(type) typedef struct __ ## type * type ## Ref
-#endif
 
 QT_END_NAMESPACE
 // Q_GLOBAL_STATIC

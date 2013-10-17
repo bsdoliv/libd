@@ -151,7 +151,7 @@
 /* Intel C++ also masquerades as GCC */
 #    define Q_CC_INTEL
 #    define Q_ASSUME_IMPL(expr)  __assume(expr)
-#    define Q_UNREACHABLE_IMPL() __builtin_unreachable()
+#    define Q_UNREACHABLE_IMPL() __assume(0)
 #  elif defined(__clang__)
 /* Clang also masquerades as GCC */
 #    define Q_CC_CLANG
@@ -190,6 +190,7 @@
 #  define Q_REQUIRED_RESULT __attribute__ ((__warn_unused_result__))
 #  if !defined(QT_MOC_CPP)
 #    define Q_PACKED __attribute__ ((__packed__))
+#    define Q_NO_PACKED_REFERENCE
 #    ifndef __ARM_EABI__
 #      define QT_NO_ARM_EABI
 #    endif
@@ -440,7 +441,6 @@
  *  N2346           Q_COMPILER_DEFAULT_MEMBERS
  *  N2346           Q_COMPILER_DELETE_MEMBERS
  *  N1986           Q_COMPILER_DELEGATING_CONSTRUCTORS
- *  N2437           Q_COMPILER_EXPLICIT_CONVERSIONS
  *  N3206 N3272     Q_COMPILER_EXPLICIT_OVERRIDES   (v0.9 and above only)
  *  N1987           Q_COMPILER_EXTERN_TEMPLATES
  *  N2540           Q_COMPILER_INHERITING_CONSTRUCTORS
@@ -491,20 +491,10 @@
 #      define Q_COMPILER_VARIADIC_TEMPLATES
 #    endif
 #    if __INTEL_COMPILER >= 1300
-#      define Q_COMPILER_ATOMICS
 //       constexpr support is only partial
 //#      define Q_COMPILER_CONSTEXPR
 #      define Q_COMPILER_INITIALIZER_LISTS
 #      define Q_COMPILER_NOEXCEPT
-#    endif
-#    if __INTEL_COMPILER >= 1400
-#      define Q_COMPILER_CONSTEXPR
-#      define Q_COMPILER_DELEGATING_CONSTRUCTORS
-#      define Q_COMPILER_EXPLICIT_OVERRIDES
-#      define Q_COMPILER_NONSTATIC_MEMBER_INIT
-#      define Q_COMPILER_RAW_STRINGS
-#      define Q_COMPILER_REF_QUALIFIERS
-#      define Q_COMPILER_UNRESTRICTED_UNIONS
 #    endif
 #  endif
 #endif
@@ -555,9 +545,6 @@
 #    if __has_feature(cxx_delegating_constructors)
 #      define Q_COMPILER_DELEGATING_CONSTRUCTORS
 #    endif
-#    if __has_feature(cxx_explicit_conversions)
-#      define Q_COMPILER_EXPLICIT_CONVERSIONS
-#    endif
 #    if __has_feature(cxx_override_control)
 #      define Q_COMPILER_EXPLICIT_OVERRIDES
 #    endif
@@ -597,7 +584,7 @@
 #    if __has_feature(cxx_alias_templates)
 #      define Q_COMPILER_TEMPLATE_ALIAS
 #    endif
-#    if __has_feature(cxx_thread_local)
+#    if 0 /* not implemented in clang yet */
 #      define Q_COMPILER_THREAD_LOCAL
 #    endif
 #    if __has_feature(cxx_user_literals)
@@ -619,14 +606,6 @@
 #    endif
 #  endif
 #endif // Q_CC_CLANG
-
-#if defined(Q_CC_CLANG) && defined(__APPLE__)
-/* Apple/clang specific features */
-#  define Q_DECL_CF_RETURNS_RETAINED __attribute__((cf_returns_retained))
-#  ifdef __OBJC__
-#    define Q_DECL_NS_RETURNS_AUTORELEASED __attribute__((ns_returns_autoreleased))
-#  endif
-#endif
 
 #if defined(Q_CC_GNU) && !defined(Q_CC_INTEL) && !defined(Q_CC_CLANG)
 #  if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
@@ -651,7 +630,6 @@
 #    endif
 #    if (__GNUC__ * 100 + __GNUC_MINOR__) >= 405
        /* C++11 features supported in GCC 4.5: */
-#      define Q_COMPILER_EXPLICIT_CONVERSIONS
 #      define Q_COMPILER_LAMBDA
 #      define Q_COMPILER_RAW_STRINGS
 #    endif
@@ -814,6 +792,10 @@
 #ifndef Q_NORETURN
 # define Q_NORETURN
 #endif
+#ifndef Q_PACKED
+#  define Q_PACKED
+#  undef Q_NO_PACKED_REFERENCE
+#endif
 #ifndef Q_LIKELY
 #  define Q_LIKELY(x) (x)
 #endif
@@ -857,12 +839,6 @@
 #    define Q_FUNC_INFO __FILE__ ":" QT_STRINGIFY(__LINE__)
 #  endif
 #endif
-#ifndef Q_DECL_CF_RETURNS_RETAINED
-#  define Q_DECL_CF_RETURNS_RETAINED
-#endif
-#ifndef Q_DECL_NS_RETURNS_AUTORELEASED
-#  define Q_DECL_NS_RETURNS_AUTORELEASED
-#endif
 
 /*
    Workaround for static const members on MSVC++.
@@ -904,27 +880,5 @@
         Q_ASSUME_IMPL(valueOfExpression);\
         Q_UNUSED(valueOfExpression); /* the value may not be used if Q_ASSERT_X and Q_ASSUME_IMPL are noop */\
     } while (0)
-
-
-/*
-    Sanitize compiler feature availability
-*/
-#if !defined(Q_PROCESSOR_X86)
-#  undef QT_COMPILER_SUPPORTS_SSE2
-#  undef QT_COMPILER_SUPPORTS_SSE3
-#  undef QT_COMPILER_SUPPORTS_SSSE3
-#  undef QT_COMPILER_SUPPORTS_SSE4_1
-#  undef QT_COMPILER_SUPPORTS_SSE4_2
-#  undef QT_COMPILER_SUPPORTS_AVX
-#  undef QT_COMPILER_SUPPORTS_AVX2
-#endif
-#if !defined(Q_PROCESSOR_ARM)
-#  undef QT_COMPILER_SUPPORTS_IWMMXT
-#  undef QT_COMPILER_SUPPORTS_NEON
-#endif
-#if !defined(Q_PROCESSOR_MIPS)
-#  undef QT_COMPILER_SUPPORTS_MIPS_DSP
-#  undef QT_COMPILER_SUPPORTS_MIPS_DSPR2
-#endif
 
 #endif // QCOMPILERDETECTION_H

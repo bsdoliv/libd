@@ -60,7 +60,7 @@ QT_BEGIN_NAMESPACE
     QScopedPointer guarantees that the object pointed to will get deleted when
     the current scope disappears.
 
-    Consider this function which does heap allocations, and has various exit points:
+    Consider this function which does heap allocations, and have various exit points:
 
     \snippet code/src_corelib_tools_qscopedpointer.cpp 0
 
@@ -95,9 +95,6 @@ QT_BEGIN_NAMESPACE
        this handler for pointers that were allocated with \c{new []}.
     \li QScopedPointerPodDeleter - deletes the pointer using \c{free()}. Use this
        handler for pointers that were allocated with \c{malloc()}.
-    \li QScopedPointerDeleteLater - deletes a pointer by calling \c{deleteLater()}
-       on it. Use this handler for pointers to QObject's that are actively
-       participating in a QEventLoop.
     \endlist
 
     You can pass your own classes as handlers, provided that they have a public
@@ -180,18 +177,18 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn bool operator==(const QScopedPointer<T, Cleanup> &lhs, const QScopedPointer<T, Cleanup> &rhs)
 
-    Equality operator. Returns \c true if the scoped pointers
+    Equality operator. Returns true if the scoped pointers
     \a lhs and \a rhs are pointing to the same object.
-    Otherwise returns \c false.
+    Otherwise returns false.
 */
 
 
 /*!
     \fn bool operator!=(const QScopedPointer<T, Cleanup> &lhs, const QScopedPointer<T, Cleanup> &rhs)
 
-    Inequality operator. Returns \c true if the scoped pointers
+    Inequality operator. Returns true if the scoped pointers
     \a lhs and \a rhs are \e not pointing to the same object.
-    Otherwise returns \c false.
+    Otherwise returns false.
 */
 
 /*!

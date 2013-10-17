@@ -55,7 +55,7 @@ HEADERS= src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/io/qfileinfo.h \
 	 src/corelib/io/qfile.h \
 	 src/corelib/io/qfiledevice.h \
-	 src/corelib/io/qshareddata.h
+	 src/corelib/tools/qshareddata.h
 
 .if !empty(QTBASEDIR)
 import-sources: .PHONY
