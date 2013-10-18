@@ -99,5 +99,10 @@ Misc Resources
 
     * async-io demos
         http://0pointer.de/lennart/projects/libasyncns/doxygen/
+        
+    * bmake
+        http://bxr.su/NetBSD/share/mk/bsd.README
+        www.freebsd.org/doc/en/books/pmake/book.html
+
 
 # vim: set ts=4 sw=4 et:
