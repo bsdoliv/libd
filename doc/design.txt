@@ -6,7 +6,8 @@ libd Features
     hold - libuv embedded into libd
     done - qt
     done - bytearray, strings
-    wip - TCP server comprehensible API
+    done - initial work on TCP server comprehensible API
+    wip - split tcpserver and tcpsocket
     - google test framework
     - a few API tests
 

@@ -1,17 +1,16 @@
 #include "tcpserver.h"
 #include "uvwrapper.h"
 #include "daemon_p.h"
+#include "common.h"
 
 #include "uv.h"
-
-#include "qdebug.h"
 
 #include <assert.h>
 
 #define TCPSERVER_DEBUG
 
 #ifdef TCPSERVER_DEBUG
-#define    debug() qDebug() << Q_FUNC_INFO
+#define    debug() d_debug() << __FILE__ << ":" << __LINE__ << Q_FUNC_INFO
 #endif
 
 D_BEGIN_NAMESPACE
@@ -172,10 +171,10 @@ TcpServerPrivate::read_socket(uv_stream_t *server, ssize_t nread, uv_buf_t buf)
     debug() << "Bytes read: " << nread;
     debug() << "Buffer: " << buf.base;
 
-    free(buf.base);
     uv_read_stop(server);
+    free(buf.base);
 
-    std::string reply;
+    std::string reply("OK");
     // process request
     //parent->handleRequest(std::string(buf.base), &reply);
 
