@@ -1,5 +1,7 @@
 .include "Makefile.inc"
 
+.main: regress
+
 distrib: .PHONY
 	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${INCLUDEDIR}/qt
 
