@@ -1,0 +1,12 @@
+diff --git a/contrib/qtbase/qchar.cpp b/contrib/qtbase/qchar.cpp
+index 9ab7155..f484a56 100644
+--- a/contrib/qtbase/qchar.cpp
++++ b/contrib/qtbase/qchar.cpp
+@@ -50,6 +50,7 @@
+ #include "qchar.h"
+ 
+ #include "qdatastream.h"
++#include "qalgorithms.h"
+ 
+ #include "qunicodetables_p.h"
+ #include "qunicodetables.cpp"

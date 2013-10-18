@@ -50,6 +50,7 @@
 #include "qchar.h"
 
 #include "qdatastream.h"
+#include "qalgorithms.h"
 
 #include "qunicodetables_p.h"
 #include "qunicodetables.cpp"

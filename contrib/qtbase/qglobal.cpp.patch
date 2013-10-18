@@ -1,0 +1,12 @@
+diff --git a/contrib/qtbase/qglobal.cpp b/contrib/qtbase/qglobal.cpp
+index 90e202e..94a40b6 100644
+--- a/contrib/qtbase/qglobal.cpp
++++ b/contrib/qtbase/qglobal.cpp
+@@ -43,6 +43,7 @@
+ #include "qstring.h"
+ #include "qvector.h"
+ #include "qlist.h"
++#include "qthreadstorage.h"
+ 
+ #include "qdir.h"
+ #include "qdatetime.h"

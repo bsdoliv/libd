@@ -43,6 +43,7 @@
 #include "qstring.h"
 #include "qvector.h"
 #include "qlist.h"
+#include "qthreadstorage.h"
 
 #include "qdir.h"
 #include "qdatetime.h"

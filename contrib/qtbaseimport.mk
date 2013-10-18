@@ -10,6 +10,8 @@ LIBQT_RELEASE=5.1
 all: 
 	@echo "try ${.MAKE} import"
 
+QTBASEDIR?=~/qt-everywhere-opensource-src-5.1.1/qtbase
+
 SOURCES_API= src/corelib/tools/qstring.cpp \
 	     src/corelib/tools/qchar.cpp \
 	     src/corelib/io/qdebug.cpp \
@@ -139,6 +141,9 @@ import-sources: .PHONY
 		-e "s:^#include \"private/:#include \":g" \
 		-e "s:^#include <private/:#include <:g" \
 		< ${QTBASEDIR}/${_m} > ${_m:T}
+	if [ -e ${_m:T}.patch ]; then \
+		patch -p3 < ${_m:T}.patch; \
+	fi
 .endfor
 	cat	${QTBASEDIR}/mkspecs/linux-g++-64/qplatformdefs.h | \
 	sed	-e "s:^#include.*linux-g++/qplatformdefs.*::g" \
@@ -181,7 +186,7 @@ qt.mk: ${SOURCES:T} ${HEADERS:T} qfeatures.h Qt
 	echo "FILES+= Qt" >> ${.TARGET}
 	echo "FILES+= qfeatures.h" >> ${.TARGET}
 	echo "CXXFLAGS+= -I." >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_THREAD" >> ${.TARGET}
+#	echo "CXXFLAGS+= -DQT_NO_THREAD" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_QOBJECT" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_CODECS" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_UNICODETABLES" >> ${.TARGET}
