@@ -13,13 +13,28 @@ all:
 QTBASEDIR?=~/qt-everywhere-opensource-src-5.1.1/qtbase
 
 SOURCES_API= src/corelib/tools/qstring.cpp \
+	     src/corelib/io/qtextstream.cpp \
 	     src/corelib/tools/qchar.cpp \
 	     src/corelib/io/qdebug.cpp \
              src/corelib/tools/qarraydata.cpp \
 	     src/corelib/codecs/qtextcodec.cpp \
+	     src/corelib/codecs/qutfcodec.cpp \
 	     src/corelib/global/qglobal.cpp \
 	     src/corelib/tools/qregexp.cpp \
-	     src/corelib/tools/qregularexpression.cpp \
+	     src/corelib/global/qlogging.cpp \
+	     src/corelib/io/qdatastream.cpp \
+	     src/corelib/tools/qlist.cpp \
+	     src/corelib/tools/qlocale.cpp \
+		 src/corelib/tools/qlocale_tools.cpp \
+	     src/corelib/global/qnumeric.cpp \
+	     src/corelib/tools/qmap.cpp \
+	     src/corelib/io/qiodevice.cpp \
+	 src/corelib/io/qfile.cpp \
+	 src/corelib/kernel/qcoreglobaldata.cpp \
+	 src/corelib/io/qbuffer.cpp \
+	 src/corelib/tools/qhash.cpp \
+	 src/corelib/tools/qbitarray.cpp \
+	 src/corelib/tools/qdatetime.cpp \
 	     src/corelib/tools/qbytearray.cpp
 
 HEADERS_API= src/corelib/tools/qstring.h \
@@ -32,12 +47,12 @@ SOURCES= ${SOURCES_API} \
 	 src/corelib/tools/qscopedpointer.cpp \
 	 src/corelib/tools/qstringmatcher.cpp \
 	 src/corelib/thread/qatomic.cpp \
-	 src/corelib/io/qdatastream.cpp \
-	 src/corelib/io/qiodevice.cpp \
 	 src/corelib/tools/qunicodetables.cpp
 
 HEADERS= ${HEADERS_API} \
 	 src/corelib/tools/qregularexpression.h \
+	 src/corelib/plugin/qsystemlibrary_p.h \
+	 src/corelib/tools/qstringbuilder.h \
 	 src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/codecs/qtextcodec.h \
 	 src/corelib/codecs/qtextcodec_p.h \
@@ -48,9 +63,11 @@ HEADERS= ${HEADERS_API} \
 	 src/corelib/global/qcompilerdetection.h \
 	 src/corelib/global/qglobalstatic.h \
 	 src/corelib/thread/qatomic.h \
+	 src/corelib/thread/qthread.h \
 	 src/corelib/thread/qbasicatomic.h \
 	 src/corelib/thread/qthreadstorage.h \
 	 src/corelib/arch/qatomic_x86.h \
+	 src/corelib/arch/qatomic_bootstrap.h \
 	 src/corelib/thread/qgenericatomic.h \
 	 src/corelib/global/qlogging.h \
 	 src/corelib/global/qflags.h \
@@ -70,6 +87,7 @@ HEADERS= ${HEADERS_API} \
 	 src/corelib/tools/qpair.h \
 	 src/corelib/tools/qunicodetables_p.h \
 	 src/corelib/kernel/qobjectdefs.h \
+	 src/corelib/kernel/qmetaobject.h \
 	 src/corelib/kernel/qobjectdefs_impl.h \
 	 src/corelib/tools/qvector.h \
 	 src/corelib/tools/qalgorithms.h \
@@ -78,9 +96,19 @@ HEADERS= ${HEADERS_API} \
 	 src/corelib/io/qdir.h \
 	 src/corelib/io/qfileinfo.h \
 	 src/corelib/io/qfile.h \
+	 src/corelib/io/qfsfileengine_p.h \
+	 src/corelib/io/qfilesystemengine_p.h \
+	 src/corelib/io/qabstractfileengine_p.h \
+	 src/corelib/io/qfiledevice_p.h \
+	 src/corelib/io/qfilesystemmetadata_p.h \
+	 src/corelib/io/qfile_p.h \
+	 src/corelib/io/qtemporaryfile.h \
+	 src/corelib/io/qfilesystementry_p.h \
 	 src/corelib/io/qfiledevice.h \
 	 src/corelib/tools/qshareddata.h \
 	 src/corelib/kernel/qmetatype.h \
+	 src/corelib/kernel/qsystemerror_p.h \
+	 src/corelib/kernel/qcore_unix_p.h \
 	 src/corelib/tools/qvarlengtharray.h \
 	 src/corelib/tools/qcontainerfwd.h \
 	 src/corelib/global/qisenum.h \
@@ -88,6 +116,7 @@ HEADERS= ${HEADERS_API} \
 	 src/corelib/tools/qregexp.h \
 	 src/corelib/tools/qstringmatcher.h \
 	 src/corelib/tools/qdatetime.h \
+	 src/corelib/tools/qdatetime_p.h \
 	 src/corelib/tools/qsharedpointer.h \
 	 src/corelib/tools/qsharedpointer_impl.h \
 	 src/corelib/tools/qhash.h \
@@ -99,6 +128,8 @@ HEADERS= ${HEADERS_API} \
 	 src/corelib/io/qtextstream_p.h \
 	 src/corelib/io/qiodevice_p.h \
 	 src/corelib/tools/qlocale.h \
+	 src/corelib/tools/qlocale_tools_p.h \
+	 src/corelib/tools/qlocale_data_p.h \
 	 src/corelib/tools/qlocale_p.h \
 	 src/corelib/tools/qringbuffer_p.h \
 	 src/corelib/tools/qregularexpression.h \
@@ -186,12 +217,26 @@ qt.mk: ${SOURCES:T} ${HEADERS:T} qfeatures.h Qt
 	echo "FILES+= Qt" >> ${.TARGET}
 	echo "FILES+= qfeatures.h" >> ${.TARGET}
 	echo "CXXFLAGS+= -I." >> ${.TARGET}
-#	echo "CXXFLAGS+= -DQT_NO_THREAD" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_THREAD" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_QOBJECT" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_CODECS" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_UNICODETABLES" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_DATASTREAM" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_TRANSLATION" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_BOOTSTRAPPED" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_LITE_UNICODE" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_CAST_TO_ASCII" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_LIBRARY" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_SYSTEMLOCALE" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_TRANSLATION" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_QMAKE_LOCATION" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_CAST_FROM_ASCII" >> ${.TARGET}
+
+DEFINES += \
+    $$MODULE_DEFINES \
+    QT_CRYPTOGRAPHICHASH_ONLY_SHA1 \
+    QT_NO_CAST_FROM_ASCII
+
 	
 qfeatures.h:
 	echo > ${.TARGET}
