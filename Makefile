@@ -1,7 +1,7 @@
 .include "Makefile.inc"
 
 distrib: .PHONY
-	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR}
+	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${INCLUDEDIR}/qt
 
 distclean clean: .PHONY
 	rm -rfv ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${DEST_DIR}

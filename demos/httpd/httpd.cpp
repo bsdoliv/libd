@@ -1,8 +1,6 @@
 #include "httpd.h"
 
-#include <Qt>
-
-#include <iostream>
+#include <qt/qdebug.h>
 
 Httpd::Httpd() : Daemon() { }
 
@@ -10,12 +8,12 @@ Httpd::~Httpd() { }
 
 void Httpd::run()
 {
-    std::cout << "Starting..." << std::endl;
+    qDebug() << "Starting...";
 }
 
 void Httpd::handleRequest(const std::string &request, std::string *reply)
 {
-    std::cout << "Master I'm here to serve you" << std::endl;
-    std::cout << "Request: " << request << std::endl;
+    qDebug() << "Master I'm here to serve you";
+    qDebug() << "Request: " << request.c_str();
     reply->assign("OK\n");
 }

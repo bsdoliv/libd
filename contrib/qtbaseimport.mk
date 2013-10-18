@@ -1,6 +1,8 @@
 LIBQT_RELEASE=5.1
 
 # TODO - improvements
+# 	. instead of passing flags through the compiler, patch each file with
+# 	#define
 #	. seperate HEADERS/SOURCES per original-module/folder
 #	. patch model enabling us to easily generate and apply patches on the
 #	fly
@@ -8,28 +10,35 @@ LIBQT_RELEASE=5.1
 all: 
 	@echo "try ${.MAKE} import"
 
-SOURCES_EXCEPTION= qchar.cpp \
-		   qstringmatcher.cpp
+SOURCES_API= src/corelib/tools/qstring.cpp \
+	     src/corelib/tools/qchar.cpp \
+	     src/corelib/io/qdebug.cpp \
+             src/corelib/tools/qarraydata.cpp \
+	     src/corelib/codecs/qtextcodec.cpp \
+	     src/corelib/global/qglobal.cpp \
+	     src/corelib/tools/qregexp.cpp \
+	     src/corelib/tools/qregularexpression.cpp \
+	     src/corelib/tools/qbytearray.cpp
 
-SOURCES= src/corelib/codecs/qlatincodec.cpp \
-	 src/corelib/codecs/qtextcodec.cpp \
-	 src/corelib/tools/qstring.cpp \
+HEADERS_API= src/corelib/tools/qstring.h \
+	     src/corelib/tools/qchar.h \
+	     src/corelib/io/qdebug.h \
+	     src/corelib/tools/qbytearray.h
+
+SOURCES= ${SOURCES_API} \
+	 src/corelib/codecs/qlatincodec.cpp \
 	 src/corelib/tools/qscopedpointer.cpp \
-	 src/corelib/tools/qchar.cpp \
 	 src/corelib/tools/qstringmatcher.cpp \
-	 src/corelib/global/qglobal.cpp \
 	 src/corelib/thread/qatomic.cpp \
 	 src/corelib/io/qdatastream.cpp \
 	 src/corelib/io/qiodevice.cpp \
-	 src/corelib/tools/qunicodetables.cpp \
-	 src/corelib/io/qdebug.cpp \
-	 src/corelib/tools/qbytearray.cpp
+	 src/corelib/tools/qunicodetables.cpp
 
-HEADERS= src/corelib/codecs/qlatincodec_p.h \
+HEADERS= ${HEADERS_API} \
+	 src/corelib/tools/qregularexpression.h \
+	 src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/codecs/qtextcodec.h \
 	 src/corelib/codecs/qtextcodec_p.h \
-	 src/corelib/tools/qstring.h \
-	 src/corelib/tools/qchar.h \
 	 src/corelib/tools/qscopedpointer.h \
 	 src/corelib/global/qglobal.h \
 	 src/corelib/global/qsystemdetection.h \
@@ -38,6 +47,7 @@ HEADERS= src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/global/qglobalstatic.h \
 	 src/corelib/thread/qatomic.h \
 	 src/corelib/thread/qbasicatomic.h \
+	 src/corelib/thread/qthreadstorage.h \
 	 src/corelib/arch/qatomic_x86.h \
 	 src/corelib/thread/qgenericatomic.h \
 	 src/corelib/global/qlogging.h \
@@ -49,8 +59,8 @@ HEADERS= src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/io/qdatastream_p.h \
 	 src/corelib/io/qiodevice.h \
 	 src/corelib/io/qbuffer.h \
-	 src/corelib/tools/qbytearray.h \
 	 src/corelib/tools/qbytearraymatcher.h \
+	 src/corelib/tools/qbitarray.h \
 	 src/corelib/tools/qrefcount.h \
 	 src/corelib/global/qnamespace.h \
 	 src/corelib/global/qendian.h \
@@ -79,10 +89,10 @@ HEADERS= src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/tools/qsharedpointer.h \
 	 src/corelib/tools/qsharedpointer_impl.h \
 	 src/corelib/tools/qhash.h \
+	 src/corelib/tools/qcache.h \
 	 src/corelib/tools/qmap.h \
 	 src/corelib/tools/qset.h \
 	 src/corelib/tools/qcontiguouscache.h \
-	 src/corelib/io/qdebug.h \
 	 src/corelib/io/qtextstream.h \
 	 src/corelib/io/qtextstream_p.h \
 	 src/corelib/io/qiodevice_p.h \
@@ -162,29 +172,34 @@ _SRCS=${SOURCES:T}
 _SRCS:=${_SRCS:S/${_e}//}
 .endfor
 
-qt.mk: ${SOURCES:T} ${HEADERS:T}
+qt.mk: ${SOURCES:T} ${HEADERS:T} qfeatures.h Qt
 	-rm -f ${.TARGET}
-	echo "CXXFLAGS+= -I${.CURDIR}" >> ${.TARGET}
 	echo ".PATH: ${.CURDIR}" >> ${.TARGET}
-	echo "SRCS+=${_SRCS}" >> ${.TARGET}
-	echo "HDRS+=${HEADERS:T}" >> ${.TARGET}
-	echo "HDRS+=qfeatures.h" >> ${.TARGET}
+	echo "SRCS= ${SOURCES_API:T}" >> ${.TARGET}
+	echo "FILES= ${HEADERS:T}" >> ${.TARGET}
+	echo "FILES+= qt.h" >> ${.TARGET}
+	echo "FILES+= Qt" >> ${.TARGET}
+	echo "FILES+= qfeatures.h" >> ${.TARGET}
+	echo "CXXFLAGS+= -I." >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_THREAD" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_QOBJECT" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_CODECS" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_UNICODETABLES" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_DATASTREAM" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_TRANSLATION" >> ${.TARGET}
-	echo "qt.h: ${HEADERS:T}" >> ${.TARGET}
-#.for _e in ${SOURCES_EXCEPTION}
-#	echo "\t echo '#include 
-#_SRCS:=${_SRCS:S/${_e}//}
-#	${HEADERS:T}" >> ${.TARGET}
-#.endfor
 	
 qfeatures.h:
 	echo > ${.TARGET}
 
-import: .PHONY import-sources qt.mk qfeatures.h
+qt.h: ${HEADERS_API:T}
+	rm ${.TARGET}
+.for _h in ${HEADERS_API:T}
+	echo '#include "${_h}"' >> ${.TARGET}
+.endfor
+
+Qt: qt.h
+	echo '#include "${.ALLSRC}"' > ${.TARGET}
+
+import: .PHONY import-sources qt.mk
 
 # vim: set ts=8 sw=8 noet:
