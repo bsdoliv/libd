@@ -50,9 +50,9 @@
 #include "qstringlist.h"
 #include "qvarlengtharray.h"
 #if !defined(QT_BOOTSTRAPPED)
-#include <private/qcoreapplication_p.h>
+#include <qcoreapplication_p.h>
 #endif
-#include "private/qcoreglobaldata_p.h"
+#include "qcoreglobaldata_p.h"
 
 #include "qutfcodec_p.h"
 #include "qlatincodec_p.h"

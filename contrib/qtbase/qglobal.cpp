@@ -48,7 +48,7 @@
 #include "qdatetime.h"
 
 #ifndef QT_NO_QOBJECT
-#include <private/qthread_p.h>
+#include <qthread_p.h>
 #endif
 
 #include <stdlib.h>
@@ -1671,7 +1671,7 @@ const int QSysInfo::ByteOrder = ((*((unsigned char *) &qt_one) == 0) ? BigEndian
 #if defined(Q_OS_MACX)
 
 QT_BEGIN_INCLUDE_NAMESPACE
-#include "private/qcore_mac_p.h"
+#include "qcore_mac_p.h"
 #include "qnamespace.h"
 QT_END_INCLUDE_NAMESPACE
 

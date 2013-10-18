@@ -7,7 +7,7 @@
 
 CXXFLAGS+=	-std=c++0x
 CXXFLAGS+=	-I${ABSTOP}/contrib/libuv/include
-CXXFLAGS+=	-ggdb3
+#CXXFLAGS+=	-ggdb3
 LDSTATIC= 	-static
 LIB=		dcore
 
@@ -16,7 +16,11 @@ SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp
 FILES= dglobal.h
 FILES+= Daemon daemon.h
 FILES+= HttpDaemon httpdaemon.h
+#FILES+= Qt
 FILESMODE= 600
+
+Qt: qt.h
+	echo '#include "qt.h"' > ${.TARGET}
 
 .include <bsd.lib.mk>
 

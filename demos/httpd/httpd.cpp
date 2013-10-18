@@ -1,4 +1,7 @@
 #include "httpd.h"
+
+#include <Qt>
+
 #include <iostream>
 
 Httpd::Httpd() : Daemon() { }

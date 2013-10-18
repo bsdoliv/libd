@@ -1,18 +1,29 @@
 LIBQT_RELEASE=5.1
 
+# TODO - improvements
+#	. seperate HEADERS/SOURCES per original-module/folder
+#	. patch model enabling us to easily generate and apply patches on the
+#	fly
+
 all: 
 	@echo "try ${.MAKE} import"
+
+SOURCES_EXCEPTION= qchar.cpp \
+		   qstringmatcher.cpp
 
 SOURCES= src/corelib/codecs/qlatincodec.cpp \
 	 src/corelib/codecs/qtextcodec.cpp \
 	 src/corelib/tools/qstring.cpp \
 	 src/corelib/tools/qscopedpointer.cpp \
 	 src/corelib/tools/qchar.cpp \
+	 src/corelib/tools/qstringmatcher.cpp \
 	 src/corelib/global/qglobal.cpp \
 	 src/corelib/thread/qatomic.cpp \
 	 src/corelib/io/qdatastream.cpp \
 	 src/corelib/io/qiodevice.cpp \
-	 src/corelib/tools/qunicodetables.cpp
+	 src/corelib/tools/qunicodetables.cpp \
+	 src/corelib/io/qdebug.cpp \
+	 src/corelib/tools/qbytearray.cpp
 
 HEADERS= src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/codecs/qtextcodec.h \
@@ -39,6 +50,7 @@ HEADERS= src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/io/qiodevice.h \
 	 src/corelib/io/qbuffer.h \
 	 src/corelib/tools/qbytearray.h \
+	 src/corelib/tools/qbytearraymatcher.h \
 	 src/corelib/tools/qrefcount.h \
 	 src/corelib/global/qnamespace.h \
 	 src/corelib/global/qendian.h \
@@ -60,7 +72,50 @@ HEADERS= src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/tools/qvarlengtharray.h \
 	 src/corelib/tools/qcontainerfwd.h \
 	 src/corelib/global/qisenum.h \
-	 src/corelib/tools/qstringlist.h
+	 src/corelib/tools/qstringlist.h \
+	 src/corelib/tools/qregexp.h \
+	 src/corelib/tools/qstringmatcher.h \
+	 src/corelib/tools/qdatetime.h \
+	 src/corelib/tools/qsharedpointer.h \
+	 src/corelib/tools/qsharedpointer_impl.h \
+	 src/corelib/tools/qhash.h \
+	 src/corelib/tools/qmap.h \
+	 src/corelib/tools/qset.h \
+	 src/corelib/tools/qcontiguouscache.h \
+	 src/corelib/io/qdebug.h \
+	 src/corelib/io/qtextstream.h \
+	 src/corelib/io/qtextstream_p.h \
+	 src/corelib/io/qiodevice_p.h \
+	 src/corelib/tools/qlocale.h \
+	 src/corelib/tools/qlocale_p.h \
+	 src/corelib/tools/qringbuffer_p.h \
+	 src/corelib/tools/qregularexpression.h \
+	 src/corelib/tools/qsimd_p.h \
+	 src/corelib/codecs/qutfcodec_p.h \
+	 src/corelib/global/qnumeric.h \
+	 src/corelib/global/qnumeric_p.h \
+	 src/corelib/kernel/qcoreapplication_p.h \
+	 src/corelib/kernel/qcoreapplication.h \
+	 src/corelib/kernel/qtranslator.h \
+	 src/corelib/tools/qtools_p.h \
+	 src/corelib/tools/qcollator_p.h \
+	 src/corelib/kernel/qfunctions_p.h \
+	 src/corelib/io/qsettings.h \
+	 src/corelib/kernel/qcoreglobaldata_p.h \
+	 src/corelib/thread/qreadwritelock.h \
+	 src/corelib/thread/qmutex.h \
+	 src/corelib/codecs/qtsciicodec_p.h \
+	 src/corelib/codecs/qisciicodec_p.h \
+	 src/corelib/codecs/qiconvcodec_p.h \
+	 src/corelib/codecs/qsimplecodec_p.h \
+	 src/corelib/codecs/qgb18030codec_p.h \
+	 src/corelib/codecs/qeucjpcodec_p.h \
+	 src/corelib/codecs/qjpunicode_p.h \
+	 src/corelib/codecs/qjiscodec_p.h \
+	 src/corelib/codecs/qsjiscodec_p.h \
+	 src/corelib/codecs/qeuckrcodec_p.h \
+	 src/corelib/codecs/qbig5codec_p.h \
+	 src/corelib/kernel/qvariant.h
 
 .if !empty(QTBASEDIR)
 import-sources: .PHONY
@@ -71,6 +126,8 @@ import-sources: .PHONY
 		-e "s:^#include <qconfig.h>::g" \
 		-e "s:^#include <qobject.h>::g" \
 		-e "s:^#include \"qthreadstorage.h\"::g" \
+		-e "s:^#include \"private/:#include \":g" \
+		-e "s:^#include <private/:#include <:g" \
 		< ${QTBASEDIR}/${_m} > ${_m:T}
 .endfor
 	cat	${QTBASEDIR}/mkspecs/linux-g++-64/qplatformdefs.h | \
@@ -99,30 +156,32 @@ import-sources: .PHONY
 	@echo "QTBASEDIR undefined"
 .endif
 
+# patch undesirable files
+_SRCS=${SOURCES:T}
+.for _e in ${SOURCES_EXCEPTION}
+_SRCS:=${_SRCS:S/${_e}//}
+.endfor
+
 qt.mk: ${SOURCES:T} ${HEADERS:T}
 	-rm -f ${.TARGET}
 	echo "CXXFLAGS+= -I${.CURDIR}" >> ${.TARGET}
 	echo ".PATH: ${.CURDIR}" >> ${.TARGET}
-	echo "SRCS+=${SOURCES:T}" >> ${.TARGET}
+	echo "SRCS+=${_SRCS}" >> ${.TARGET}
 	echo "HDRS+=${HEADERS:T}" >> ${.TARGET}
 	echo "HDRS+=qfeatures.h" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_THREAD" >> ${.TARGET}
 	echo "CXXFLAGS+= -DQT_NO_QOBJECT" >> ${.TARGET}
-#        QT_BOOTSTRAPPED \
-        QT_LITE_UNICODE \
-        QT_NO_CAST_TO_ASCII \
-        QT_NO_CODECS \
-        QT_NO_DATASTREAM \
-        QT_NO_LIBRARY \
-        QT_NO_QOBJECT \
-        QT_NO_SYSTEMLOCALE \
-        QT_NO_THREAD \
-        QT_NO_UNICODETABLES \
-        QT_NO_USING_NAMESPACE \
-        QT_NO_DEPRECATED \
-        QT_NO_TRANSLATION \
-
-
+	echo "CXXFLAGS+= -DQT_NO_CODECS" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_UNICODETABLES" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_DATASTREAM" >> ${.TARGET}
+	echo "CXXFLAGS+= -DQT_NO_TRANSLATION" >> ${.TARGET}
+	echo "qt.h: ${HEADERS:T}" >> ${.TARGET}
+#.for _e in ${SOURCES_EXCEPTION}
+#	echo "\t echo '#include 
+#_SRCS:=${_SRCS:S/${_e}//}
+#	${HEADERS:T}" >> ${.TARGET}
+#.endfor
+	
 qfeatures.h:
 	echo > ${.TARGET}
 

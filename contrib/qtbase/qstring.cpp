@@ -46,7 +46,7 @@
 #ifndef QT_NO_TEXTCODEC
 #include <qtextcodec.h>
 #endif
-#include <private/qutfcodec_p.h>
+#include <qutfcodec_p.h>
 #include "qsimd_p.h"
 #include <qnumeric.h>
 #include <qdatastream.h>
@@ -62,10 +62,10 @@
 #include "qcollator_p.h"
 
 #ifdef Q_OS_MAC
-#include <private/qcore_mac_p.h>
+#include <qcore_mac_p.h>
 #endif
 
-#include <private/qfunctions_p.h>
+#include <qfunctions_p.h>
 
 #include <limits.h>
 #include <string.h>
