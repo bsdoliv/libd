@@ -1,20 +1,33 @@
 libd Features
-    wip - reactor pattern (wrapper over libevent or eventmachine)
+    ** bootstrap
+    done - libuv
+    hold - reactor pattern (wrapper over libevent or eventmachine)
         . timers
-    wip - libuv embedded into libd
+    hold - libuv embedded into libd
+    done - qt
+    done - bytearray, strings
+
+    ** rest
+    - TCP server comprehensible API
+    - web.py basic api
+
+    ** logging
+    - warning/debug/info facilities
+    - log to shm facilities (varnish)
+    - UDP client comprehensible API
+
+    ** file I/O
+    - file I/O mmap
+
+    ** varnish
+    - metrics collection facilities (varnish)
+        . time measuring (QTime)
+
+    ** further
     - daemon/service facilities
         http://git.0pointer.de/?p=libdaemon.git
         http://0pointer.de/lennart/projects/libdaemon/
-    - bytearray, strings
-    - warning/debug/info facilities
-    - TCP comprehensible API
-    - web.py basic api
-    - UDP comprehensible API
-    - log facilities (varnish)
-    - metrics collection facilities (varnish)
-        . time measuring (QTime)
     - IPC
-        . shared memory
     - data structures
         . hash (wrapper over sparsehash)
         . caching (qcache)
