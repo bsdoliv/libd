@@ -2,18 +2,20 @@
 
 #include <qt/qdebug.h>
 
+#define debug() qDebug() << Q_FUNC_INFO
+
 Httpd::Httpd() : Daemon() { }
 
 Httpd::~Httpd() { }
 
 void Httpd::run()
 {
-    qDebug() << "Starting...";
+    debug() << "Starting...";
 }
 
 void Httpd::handleRequest(const std::string &request, std::string *reply)
 {
-    qDebug() << "Master I'm here to serve you";
-    qDebug() << "Request: " << request.c_str();
+    debug() << "Master I'm here to serve you";
+    debug() << "Request: " << request.c_str();
     reply->assign("OK\n");
 }

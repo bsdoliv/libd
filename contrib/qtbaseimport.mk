@@ -13,9 +13,20 @@ all:
 QTBASEDIR?=~/qt-everywhere-opensource-src-5.1.1/qtbase
 
 SOURCES_API= src/corelib/tools/qstring.cpp \
+	     src/corelib/tools/qstringlist.cpp \
+	     src/corelib/tools/qbytearraymatcher.cpp \
+	     src/corelib/kernel/qsystemerror.cpp \
+	     src/corelib/tools/qstack.cpp \
+	     src/corelib/codecs/qlatincodec.cpp \
 	     src/corelib/io/qtextstream.cpp \
+	     src/corelib/io/qfilesystemengine.cpp \
+	     src/corelib/io/qfilesystemengine_unix.cpp \
 	     src/corelib/tools/qchar.cpp \
 	     src/corelib/io/qdebug.cpp \
+	     src/corelib/io/qdiriterator.cpp \
+	     src/corelib/io/qfilesystemiterator_unix.cpp \
+	     src/corelib/io/qdir.cpp \
+	     src/corelib/io/qtemporaryfile.cpp \
              src/corelib/tools/qarraydata.cpp \
 	     src/corelib/codecs/qtextcodec.cpp \
 	     src/corelib/codecs/qutfcodec.cpp \
@@ -25,16 +36,24 @@ SOURCES_API= src/corelib/tools/qstring.cpp \
 	     src/corelib/io/qdatastream.cpp \
 	     src/corelib/tools/qlist.cpp \
 	     src/corelib/tools/qlocale.cpp \
-		 src/corelib/tools/qlocale_tools.cpp \
+	     src/corelib/tools/qlocale_tools.cpp \
 	     src/corelib/global/qnumeric.cpp \
 	     src/corelib/tools/qmap.cpp \
 	     src/corelib/io/qiodevice.cpp \
-	 src/corelib/io/qfile.cpp \
-	 src/corelib/kernel/qcoreglobaldata.cpp \
-	 src/corelib/io/qbuffer.cpp \
-	 src/corelib/tools/qhash.cpp \
-	 src/corelib/tools/qbitarray.cpp \
-	 src/corelib/tools/qdatetime.cpp \
+	     src/corelib/io/qfiledevice.cpp \
+	     src/corelib/io/qfilesystementry.cpp \
+	     src/corelib/io/qfile.cpp \
+	     src/corelib/io/qfsfileengine.cpp \
+	     src/corelib/io/qfsfileengine_unix.cpp \
+	     src/corelib/io/qabstractfileengine.cpp \
+	     src/corelib/io/qfileinfo.cpp \
+	     src/corelib/global/qmalloc.cpp \
+	     src/corelib/io/qfsfileengine_iterator.cpp \
+	     src/corelib/kernel/qcoreglobaldata.cpp \
+	     src/corelib/io/qbuffer.cpp \
+	     src/corelib/tools/qhash.cpp \
+	     src/corelib/tools/qbitarray.cpp \
+	     src/corelib/tools/qdatetime.cpp \
 	     src/corelib/tools/qbytearray.cpp
 
 HEADERS_API= src/corelib/tools/qstring.h \
@@ -43,7 +62,6 @@ HEADERS_API= src/corelib/tools/qstring.h \
 	     src/corelib/tools/qbytearray.h
 
 SOURCES= ${SOURCES_API} \
-	 src/corelib/codecs/qlatincodec.cpp \
 	 src/corelib/tools/qscopedpointer.cpp \
 	 src/corelib/tools/qstringmatcher.cpp \
 	 src/corelib/thread/qatomic.cpp \
@@ -51,12 +69,17 @@ SOURCES= ${SOURCES_API} \
 
 HEADERS= ${HEADERS_API} \
 	 src/corelib/tools/qregularexpression.h \
+	 src/corelib/io/qfilesystemiterator_p.h \
 	 src/corelib/plugin/qsystemlibrary_p.h \
 	 src/corelib/tools/qstringbuilder.h \
+	 src/corelib/io/qfilesystementry_p.h \
+	 src/corelib/io/qtemporaryfile.h \
+	 src/corelib/io/qtemporaryfile_p.h \
 	 src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/codecs/qtextcodec.h \
 	 src/corelib/codecs/qtextcodec_p.h \
 	 src/corelib/tools/qscopedpointer.h \
+	 src/corelib/tools/qstack.h \
 	 src/corelib/global/qglobal.h \
 	 src/corelib/global/qsystemdetection.h \
 	 src/corelib/global/qprocessordetection.h \
@@ -94,9 +117,13 @@ HEADERS= ${HEADERS_API} \
 	 src/corelib/tools/qiterator.h \
 	 src/corelib/tools/qlist.h \
 	 src/corelib/io/qdir.h \
+	 src/corelib/io/qdir_p.h \
+	 src/corelib/io/qdiriterator.h \
 	 src/corelib/io/qfileinfo.h \
+	 src/corelib/io/qfileinfo_p.h \
 	 src/corelib/io/qfile.h \
 	 src/corelib/io/qfsfileengine_p.h \
+	 src/corelib/io/qfsfileengine_iterator_p.h \
 	 src/corelib/io/qfilesystemengine_p.h \
 	 src/corelib/io/qabstractfileengine_p.h \
 	 src/corelib/io/qfiledevice_p.h \

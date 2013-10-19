@@ -2,8 +2,9 @@
 LIBD_MK=
 
 LDADD+=	-L${LIBDIR}
-LDADD+=	-luv
 LDADD+=	-ldcore
+LDADD+=	${LIBDIR}/libuv.a
+#LDADD+=	-pthread
 
 .endif # !LIBD_MK
 
