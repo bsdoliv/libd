@@ -1,13 +1,13 @@
 #ifndef DAEMON_H
 #define DAEMON_H
 
-#include <string>
-
+//#include <string>
 #include "dglobal.h"
 
 D_BEGIN_NAMESPACE
 
-struct DaemonPrivate;
+class EventLoop;
+class DaemonPrivate;
 class Daemon 
 {
 public:
@@ -16,7 +16,9 @@ public:
 
     int exec();
     virtual void run() = 0;
-    virtual void handleRequest(const std::string &request, std::string *reply) = 0;
+
+protected:
+    EventLoop *defaultLoop();
 
 private:
     DaemonPrivate *d;

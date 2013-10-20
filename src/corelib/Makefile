@@ -11,7 +11,7 @@ CXXFLAGS+=	-I${ABSTOP}/contrib/qtbase
 LDSTATIC= 	-static
 LIB=		dcore
 
-SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp hostaddress.cpp
+SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp hostaddress.cpp tcpserver.cpp
 
 FILES= dglobal.h
 FILES+= Daemon daemon.h
