@@ -29,6 +29,7 @@ struct TaskData {
 
 struct TcpServerPrivate {
     uint16_t port;
+    HostAddress bind_address;
     uv_tcp_t server;
     int curtask;
     uv_mutex_t mtx;
@@ -98,11 +99,15 @@ TcpServer::~TcpServer()
 }
 
 void
-TcpServer::run() { }
+TcpServer::run() 
+{ }
 
 bool 
-TcpServer::listen(const HostAddress &address, quint16 port)
+TcpServer::listen(const HostAddress &address, uint16_t port)
 {
+    d->port = port;
+    d->bind_address = address;
+
     uv_loop_t *loop = defaultLoop()->uv_loop();
     uv_tcp_init(loop, &d->server);
 
@@ -115,7 +120,6 @@ TcpServer::listen(const HostAddress &address, quint16 port)
     }
 
     uv_tcp_simultaneous_accepts(&d->server, 1);
-    debug() << "Listening on" << port;
     return (d->listening = true);
 }
 
@@ -191,6 +195,25 @@ bool
 TcpServer::isListening() const
 {
     return d->listening;
+}
+
+bool
+TcpServer::hasConnections() const
+{ }
+
+TcpSocket *nextConnection()
+{ }
+
+uint16_t
+TcpServer::port() const
+{
+    return d->port;
+}
+
+HostAddress
+TcpServer::address() const
+{
+    return d->bind_address;
 }
 
 D_END_NAMESPACE

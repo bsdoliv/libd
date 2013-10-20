@@ -7,6 +7,8 @@ CXXFLAGS+=	-std=c++0x
 LDSTATIC=	-static
 LIB= 		qt
 
+build: .PHONY all
+
 .include "qt.mk"
 
 FILES+= Qt

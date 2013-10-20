@@ -1,0 +1,4 @@
+tcpd
+.depend_local
+*.o
+**.swp

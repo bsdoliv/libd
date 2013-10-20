@@ -4,7 +4,9 @@ LIBD_MK=
 LDADD+=	-L${LIBDIR}
 LDADD+=	-ldcore
 LDADD+=	${LIBDIR}/libuv.a
-#LDADD+=	-pthread
+
+# qt link flags should necessarily come after
+.include "${ABSTOP}/mk/qt.mk"
 
 .endif # !LIBD_MK
 

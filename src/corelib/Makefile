@@ -7,16 +7,22 @@
 CXXFLAGS+=	-std=c++0x
 CXXFLAGS+=	-I${ABSTOP}/contrib/libuv/include
 CXXFLAGS+=	-I${ABSTOP}/contrib/qtbase
+CXXFLAGS+=	-I${DEST_DIR}/include/qt
 #CXXFLAGS+=	-ggdb3
 LDSTATIC= 	-static
 LIB=		dcore
 
 SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp hostaddress.cpp tcpserver.cpp
 
-FILES= dglobal.h
+FILES= dglobal.h \
+       abstractsocket.h
 FILES+= Daemon daemon.h
 FILES+= HttpDaemon httpdaemon.h
+FILES+= TcpServer tcpserver.h
+FILES+= HostAddress hostaddress.h
 FILESMODE= 600
+
+build: .PHONY all
 
 .include <bsd.lib.mk>
 

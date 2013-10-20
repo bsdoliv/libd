@@ -31,6 +31,9 @@
 #include "abstractsocket.h"
 #include "hostaddress.h"
 
+#include <sys/types.h>
+#include <inttypes.h>
+
 D_BEGIN_NAMESPACE
 
 class TcpServerPrivate;
@@ -44,7 +47,7 @@ public:
 
     virtual void run();
 
-    bool listen(const HostAddress &address = HostAddress::Any, quint16 port = 0);
+    bool listen(const HostAddress &address = HostAddress::Any, uint16_t port = 0);
     void close();
 
     bool isListening() const;
@@ -61,8 +64,8 @@ public:
     bool setSocketDescriptor(qintptr socketDescriptor);
 
 //    bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
-    virtual bool hasPendingConnections() const;
-    virtual TcpSocket *nextPendingConnection();
+    bool hasConnections() const;
+    TcpSocket *nextConnection();
 
     AbstractSocket::SocketError serverError() const;
     QString errorString() const;

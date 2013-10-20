@@ -6,7 +6,9 @@ libd Features
     hold - libuv embedded into libd
     done - qt
     done - bytearray, strings
-    - TCP server comprehensible API
+    wip - TCP server comprehensible API
+    - google test framework
+    - a few API tests
 
     ** rest
     - qhostaddress import

@@ -10,8 +10,19 @@
 
 D_BEGIN_NAMESPACE
 
-Daemon::Daemon() { };
-Daemon::~Daemon() { };
+struct DaemonPrivate
+{
+    EventLoop default_loop;
+};
+
+Daemon::Daemon() :
+    d(new DaemonPrivate)
+{ }
+
+Daemon::~Daemon() 
+{ 
+    delete d;
+}
 
 // runs event loop
 int 
@@ -21,6 +32,12 @@ Daemon::exec()
     run();
     uv_loop_t *loop = uv_default_loop();
     return uv_run(loop, UV_RUN_DEFAULT);
+}
+
+EventLoop *
+Daemon::defaultLoop()
+{
+    return &d->default_loop;
 }
 
 #if 0

@@ -9,7 +9,10 @@ D_BEGIN_NAMESPACE
 struct EventLoop
 {
 public:
-    uv_loop_t *uv_loop();
+    uv_loop_t *uv_loop()
+    { 
+        return uv_default_loop();
+    }
 };
 
 D_END_NAMESPACE
