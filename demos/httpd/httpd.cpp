@@ -13,7 +13,7 @@ void Httpd::run()
     debug() << "Starting...";
 }
 
-void Httpd::handleRequest(const std::string &request, std::string *reply)
+void Httpd::newConnection(const std::string &request, std::string *reply)
 {
     debug() << "Master I'm here to serve you";
     debug() << "Request: " << request.c_str();

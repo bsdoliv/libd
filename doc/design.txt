@@ -6,8 +6,11 @@ libd Features
     hold - libuv embedded into libd
     done - qt
     done - bytearray, strings
+    - TCP server comprehensible API
 
     ** rest
+    - qhostaddress import
+    - qtcpserver import
     - TCP server comprehensible API
     - web.py basic api
 

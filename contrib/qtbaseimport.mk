@@ -51,6 +51,7 @@ SOURCES_API= src/corelib/tools/qstring.cpp \
 	     src/corelib/io/qfsfileengine_iterator.cpp \
 	     src/corelib/kernel/qcoreglobaldata.cpp \
 	     src/corelib/io/qbuffer.cpp \
+	     src/corelib/io/qipaddress.cpp \
 	     src/corelib/tools/qhash.cpp \
 	     src/corelib/tools/qbitarray.cpp \
 	     src/corelib/tools/qdatetime.cpp \
@@ -74,6 +75,7 @@ HEADERS= ${HEADERS_API} \
 	 src/corelib/tools/qstringbuilder.h \
 	 src/corelib/io/qfilesystementry_p.h \
 	 src/corelib/io/qtemporaryfile.h \
+	 src/corelib/io/qipaddress_p.h \
 	 src/corelib/io/qtemporaryfile_p.h \
 	 src/corelib/codecs/qlatincodec_p.h \
 	 src/corelib/codecs/qtextcodec.h \

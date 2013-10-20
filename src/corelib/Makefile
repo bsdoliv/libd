@@ -6,11 +6,12 @@
 
 CXXFLAGS+=	-std=c++0x
 CXXFLAGS+=	-I${ABSTOP}/contrib/libuv/include
+CXXFLAGS+=	-I${ABSTOP}/contrib/qtbase
 #CXXFLAGS+=	-ggdb3
 LDSTATIC= 	-static
 LIB=		dcore
 
-SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp
+SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp hostaddress.cpp
 
 FILES= dglobal.h
 FILES+= Daemon daemon.h
