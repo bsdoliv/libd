@@ -1,7 +1,6 @@
 #ifndef DAEMON_H
 #define DAEMON_H
 
-//#include <string>
 #include "dglobal.h"
 
 D_BEGIN_NAMESPACE
