@@ -9,8 +9,7 @@ public:
     Tcpd();
     virtual ~Tcpd();
     void run();
-    void newConnection();
-//    void handleRequest(const std::string &request, std::string *reply);
+    void newConnection(TcpConnection *c);
 };
 
 #endif // !TCPD_H

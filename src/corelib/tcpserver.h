@@ -37,8 +37,7 @@
 D_BEGIN_NAMESPACE
 
 class TcpServerPrivate;
-class TcpSocket;
-
+class TcpConnection;
 class TcpServer : public Daemon
 {
 public:
@@ -65,11 +64,10 @@ public:
 
 //    bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
     bool hasConnections() const;
-    TcpSocket *nextConnection();
 
     AbstractSocket::SocketError serverError() const;
     QString errorString() const;
-    virtual void newConnection() = 0;
+    virtual void newConnection(TcpConnection *c) = 0;
 
 private:
     friend class TcpServerPrivate;

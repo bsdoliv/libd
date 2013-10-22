@@ -12,13 +12,15 @@ CXXFLAGS+=	-I${DEST_DIR}/include/qt
 LDSTATIC= 	-static
 LIB=		dcore
 
-SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp hostaddress.cpp tcpserver.cpp
+SRCS+= daemon.cpp httpdaemon.cpp uvwrapper.cpp hostaddress.cpp tcpserver.cpp \
+       tcpconnection.cpp
 
 FILES= dglobal.h \
        abstractsocket.h
 FILES+= Daemon daemon.h
 FILES+= HttpDaemon httpdaemon.h
 FILES+= TcpServer tcpserver.h
+FILES+= TcpConnection tcpconnection.h
 FILES+= HostAddress hostaddress.h
 FILESMODE= 600
 

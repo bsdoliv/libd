@@ -3,6 +3,6 @@
 
 #include "qdebug.h"
 
-#define d_debug() qDebug()
+#define d_debug() qDebug() << __FILE__ << ":" << __LINE__ << Q_FUNC_INFO
 
 #endif //! COMMON_H

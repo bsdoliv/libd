@@ -53,6 +53,7 @@ SOURCES_API= src/corelib/tools/qstring.cpp \
 	     src/corelib/io/qbuffer.cpp \
 	     src/corelib/io/qipaddress.cpp \
 	     src/corelib/tools/qhash.cpp \
+	     src/corelib/tools/qqueue.cpp \
 	     src/corelib/tools/qbitarray.cpp \
 	     src/corelib/tools/qdatetime.cpp \
 	     src/corelib/tools/qbytearray.cpp
@@ -60,6 +61,7 @@ SOURCES_API= src/corelib/tools/qstring.cpp \
 HEADERS_API= src/corelib/tools/qstring.h \
 	     src/corelib/tools/qchar.h \
 	     src/corelib/io/qdebug.h \
+	     src/corelib/tools/qqueue.h \
 	     src/corelib/tools/qbytearray.h
 
 SOURCES= ${SOURCES_API} \

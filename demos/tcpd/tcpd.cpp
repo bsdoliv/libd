@@ -1,5 +1,7 @@
 #include "tcpd.h"
 
+#include <TcpConnection>
+
 #include <qt/qdebug.h>
 
 #define debug() qDebug() << Q_FUNC_INFO
@@ -14,7 +16,7 @@ void Tcpd::run()
     debug() << "Listening on" << port();
 }
 
-void Tcpd::newConnection()
+void Tcpd::newConnection(TcpConnection *c)
 {
     debug() << "Master I'm here to serve you";
 //    debug() << "Request: " << request.c_str();

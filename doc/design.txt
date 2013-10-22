@@ -2,7 +2,6 @@ libd Features
     ** bootstrap
     done - libuv
     hold - reactor pattern (wrapper over libevent or eventmachine)
-        . timers
     hold - libuv embedded into libd
     done - qt
     done - bytearray, strings
@@ -10,6 +9,7 @@ libd Features
     wip - split tcpserver and tcpsocket
     - google test framework
     - a few API tests
+    - timers (Daemon)
 
     ** rest
     - qhostaddress import
