@@ -2,10 +2,10 @@ libd
 ====
 
 libd is an Unix-style oriented framework for writing of event-driven network
-daemons/services in C++, focusing on clear and comprehensible API, which
-strongly relies on libuv[1] in it's core, moreover libd also provides you a
-library of several Unix design patterns as found in high-performance services
-such as varnish-cache[2].
+daemons/services in C++ focused on clear and comprehensible API, but still fast.
+It also provides a high-level library of several Unix design patterns as found 
+in high-performance services such as varnish-cache[2]. libd strongly relies on
+libuv[1] as it's event-machine core.
 
 In the API level, you'll find a way to build C++ webservices with the same look
 and feel of web.py[3], or TCP-servers with the same look and feel of
