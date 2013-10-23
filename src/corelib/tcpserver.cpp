@@ -46,7 +46,6 @@ void
 TcpServerPrivate::newconnection_cb(uv_work_t *req)
 {
     ConnectionData *td = (ConnectionData *)req->data;
-//    conn->setConnectionData(td);
     parent->newConnection(new TcpConnection(parent, td));
 }
 
@@ -61,7 +60,6 @@ TcpServerPrivate::enqueue_connection(uv_tcp_t *client)
     td->id = parent->d->curtask;
     td->client = client;
     req[parent->d->curtask].data = (void *)td;
-//    parent->d->connection_queue.enqueue(td);
 
     uv_queue_work(uv_default_loop(), 
                     &req[parent->d->curtask],
@@ -172,22 +170,5 @@ TcpServer::address() const
 {
     return d->bind_address;
 }
-
-#if 0
-    std::string reply("OK");
-    // process request
-    //parent->handleRequest(std::string(buf.base), &reply);
-
-    // prepare answer
-    uv_write_t ans;
-    uv_buf_t ansbuf;
-    ansbuf.base = const_cast<char *>(reply.c_str());
-    ansbuf.len = reply.size();
-
-    int r = uv_write(&ans, server, &ansbuf, reply.size(), NULL);
-    debug() << "Bytes written: " << reply.size();
-
-    uv_close((uv_handle_t *) server, NULL);
-#endif
 
 D_END_NAMESPACE

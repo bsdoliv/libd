@@ -12,12 +12,16 @@ struct ConnectionData {
         id(id_)
         , client(client_)
     { }
+
     int id;
     uv_tcp_t *client;
+    uv_stream_t *server;
+
     void clear()
     {
         id = -1;
         client = 0;
+        server = 0;
     }
 };
 

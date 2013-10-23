@@ -22,6 +22,7 @@ FILES+= HttpDaemon httpdaemon.h
 FILES+= TcpServer tcpserver.h
 FILES+= TcpConnection tcpconnection.h
 FILES+= HostAddress hostaddress.h
+FILES+= IOObject ioobject.h
 FILESMODE= 600
 
 build: .PHONY all

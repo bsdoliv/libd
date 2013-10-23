@@ -10,6 +10,8 @@ public:
     virtual ~Tcpd();
     void run();
     void newConnection(TcpConnection *c);
+    void readFinished(TcpConnection *c);
+    void writeFinished(TcpConnection *c);
 };
 
 #endif // !TCPD_H

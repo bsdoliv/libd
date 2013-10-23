@@ -28,6 +28,7 @@
 #define DTCPSERVER_H
 
 #include "daemon.h"
+#include "ioobject.h"
 #include "abstractsocket.h"
 #include "hostaddress.h"
 
@@ -38,7 +39,7 @@ D_BEGIN_NAMESPACE
 
 class TcpServerPrivate;
 class TcpConnection;
-class TcpServer : public Daemon
+class TcpServer : public Daemon, public IOObject
 {
 public:
     explicit TcpServer();
