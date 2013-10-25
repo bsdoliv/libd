@@ -33,13 +33,13 @@ Tcpd::readFinished(TcpConnection *c)
 
     QByteArray reply("OK\n");
     uint64_t r = c->write(reply.data(), reply.size());
-//    delete c;
+
+    debug() << "write result" << r;
+    //c->close();
 }
 
 void 
 Tcpd::writeFinished(TcpConnection *c)
 { 
     debug() << "write finished";
-//    debug() << "buffer" << c->buffer()->data();
-//    delete c;
 }

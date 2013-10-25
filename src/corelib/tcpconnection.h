@@ -21,6 +21,7 @@ public:
     
     void read();
     uint64_t write(const char * data, uint64_t size);
+    void close();
 
     QByteArray *buffer();
 

@@ -19,11 +19,10 @@
 
 D_BEGIN_NAMESPACE
 
-static TcpServer *parent = 0;
-
 #define MAXTASKS 4
 struct TcpServerPrivate {
     uv_tcp_t server;
+    TcpServer *parent;
 
     uint16_t port;
     HostAddress bind_address;
@@ -35,56 +34,59 @@ struct TcpServerPrivate {
     uv_work_t req[MAXTASKS];
     ConnectionData conns_databucket[MAXTASKS];
 
-    void enqueue_connection(uv_tcp_t *client);
-
-    static void handle_accept(uv_stream_t *, int);
+    void enqueueConnection(uv_tcp_t *client);
+    static void handle_accept_cb(uv_stream_t *, int);
     static void newconnection_cb(uv_work_t *req);
-    static void connection_finished(uv_work_t *req, int status);
+    static void connection_finished_cb(uv_work_t *req, int status);
 };
 
 void
-TcpServerPrivate::newconnection_cb(uv_work_t *req)
+TcpServerPrivate::newconnection_cb(uv_work_t * req)
 {
     ConnectionData *td = (ConnectionData *)req->data;
-    parent->newConnection(new TcpConnection(parent, td));
+    TcpServer *ts = (TcpServer *)td->tcpserver;
+    ts->newConnection(new TcpConnection(ts, td));
 }
 
 void 
-TcpServerPrivate::enqueue_connection(uv_tcp_t *client)
+TcpServerPrivate::enqueueConnection(uv_tcp_t *client)
 {
     uvMutexLocker(&parent->d->mtx);
-    ++parent->d->curtask;
+    ++curtask;
 
-    ConnectionData *td = &conns_databucket[parent->d->curtask];
+    ConnectionData *td = &conns_databucket[curtask];
     td->clear();
-    td->id = parent->d->curtask;
-    td->client = client;
-    req[parent->d->curtask].data = (void *)td;
+    td->id = curtask;
+    td->uv_client = client;
+    td->tcpserver = parent;
+    req[curtask].data = (void *)td;
 
     uv_queue_work(uv_default_loop(), 
-                    &req[parent->d->curtask],
+                    &req[curtask],
                     newconnection_cb,
-                    connection_finished);
+                    connection_finished_cb);
 
     debug() << "Connection spawned:" << td->id;
 }
 
 void
-TcpServerPrivate::connection_finished(uv_work_t *req, int status)
+TcpServerPrivate::connection_finished_cb(uv_work_t *req, int status)
 {
-    uvMutexLocker(&parent->d->mtx);
-    --parent->d->curtask;
-
     ConnectionData *td = (ConnectionData *)req->data;
+    TcpServer *ts = (TcpServer *)td->tcpserver;
+
+    uvMutexLocker(&ts->d->mtx);
+    --ts->d->curtask;
+
     debug() << "Connection finished: " << td->id;
 }
 
 TcpServer::TcpServer() : 
     d(new TcpServerPrivate)
 {
-    parent = this;
     d->curtask = 0;
     d->listening = false;
+    d->parent = this;
 }
 
 TcpServer::~TcpServer() 
@@ -108,8 +110,9 @@ TcpServer::listen(const HostAddress &address, uint16_t port)
     struct sockaddr_in bind_addr = uv_ip4_addr(address.toString().toLatin1(),
                                                port);
     uv_tcp_bind(&d->server, bind_addr);
+    d->server.data = this;
     int r = uv_listen((uv_stream_t *)&d->server, 128,
-                      &TcpServerPrivate::handle_accept);
+                      &TcpServerPrivate::handle_accept_cb);
     if (r != 0) {
         debug() << "Listen error" << ::uv_err_name(uv_last_error(loop));
         return (d->listening = false);
@@ -120,10 +123,11 @@ TcpServer::listen(const HostAddress &address, uint16_t port)
 }
 
 void
-TcpServerPrivate::handle_accept(uv_stream_t *server, int status)
+TcpServerPrivate::handle_accept_cb(uv_stream_t *server, int status)
 {
     assert(server);
-    if (parent->d->curtask >= MAXTASKS) {
+    TcpServer *s = (TcpServer *)server->data;
+    if (s->d->curtask >= MAXTASKS) {
         debug() << "Too many tasks, no room to handle this one.";
         return;
     }
@@ -138,9 +142,9 @@ TcpServerPrivate::handle_accept(uv_stream_t *server, int status)
     
     uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
     uv_tcp_init(uv_default_loop(), client);
-    if (uv_accept((uv_stream_t *)&parent->d->server,
+    if (uv_accept((uv_stream_t *)&s->d->server,
                   (uv_stream_t *)client) == 0) {
-        parent->d->enqueue_connection(client);
+        s->d->enqueueConnection(client);
     } else {
         uv_close((uv_handle_t *)client, NULL);
         return;
