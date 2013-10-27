@@ -39,6 +39,7 @@ D_BEGIN_NAMESPACE
 
 class TcpServerPrivate;
 class TcpConnection;
+class ConnectionData;
 class TcpServer : public Daemon, public IOObject
 {
 public:
@@ -68,7 +69,8 @@ public:
 
     AbstractSocket::SocketError serverError() const;
     QString errorString() const;
-    virtual void newConnection(TcpConnection *c) = 0;
+    virtual void newConnection(TcpConnection * c) = 0;
+    void connectionFinished(ConnectionData * data);
 
 private:
     friend class TcpServerPrivate;

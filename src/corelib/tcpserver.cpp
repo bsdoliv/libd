@@ -20,6 +20,7 @@
 D_BEGIN_NAMESPACE
 
 #define MAXTASKS 4
+
 struct TcpServerPrivate {
     TcpServer *parent;
     uv_tcp_t uv_server;
@@ -31,63 +32,35 @@ struct TcpServerPrivate {
     bool listening;
 
     uv_mutex_t mtx;
-    uv_work_t req[MAXTASKS];
     ConnectionData conns_databucket[MAXTASKS];
 
     void enqueueConnection(uv_stream_t *server, uv_tcp_t *client);
     static void handle_accept_cb(uv_stream_t *, int);
-    static void newconnection_cb(uv_work_t *req);
-    static void connection_finished_cb(uv_work_t *req, int status);
+    static void on_close(uv_handle_t *);
+    void increaseTask()
+    {
+        uvMutexLocker(&this->mtx);
+        ++curtask;
+    };
+    void decreaseTask()
+    {
+        uvMutexLocker(&this->mtx);
+        --curtask;
+    };
 };
-
-void
-TcpServerPrivate::newconnection_cb(uv_work_t * req)
-{
-#if 0
-    ConnectionData *td = (ConnectionData *)req->data;
-    TcpServer *ts = (TcpServer *)td->tcpserver;
-    ts->newConnection(new TcpConnection(ts, td));
-#endif
-}
 
 void 
 TcpServerPrivate::enqueueConnection(uv_stream_t *server, uv_tcp_t *client)
 {
-    uvMutexLocker(&parent->d->mtx);
-    ++curtask;
-
+    increaseTask();
     ConnectionData *td = &conns_databucket[curtask];
     td->clear();
     td->id = curtask;
     td->uv_client = client;
     td->uv_server = server;
-//    req[curtask].data = (void *)td;
 
-//    ConnectionData *td = (ConnectionData *)req->data;
-//    TcpServer *ts = (TcpServer *)td->tcpserver;
     parent->newConnection(new TcpConnection(parent, td));
-#if 0
-    uv_queue_work(uv_default_loop(), 
-                    &req[curtask],
-                    newconnection_cb,
-                    connection_finished_cb);
-
-    debug() << "Connection spawned:" << td->id;
-#endif
-}
-
-void
-TcpServerPrivate::connection_finished_cb(uv_work_t *req, int status)
-{
-#if 0
-    ConnectionData *td = (ConnectionData *)req->data;
-    TcpServer *ts = (TcpServer *)td->tcpserver;
-
-    uvMutexLocker(&ts->d->mtx);
-    --ts->d->curtask;
-
-    debug() << "Connection finished: " << td->id;
-#endif
+    debug() << "Current task:" << curtask;
 }
 
 TcpServer::TcpServer() : 
@@ -183,6 +156,20 @@ HostAddress
 TcpServer::address() const
 {
     return d->bind_address;
+}
+
+void
+TcpServer::connectionFinished(ConnectionData * data)
+{
+    uv_close((uv_handle_t *) data->uv_client, 
+             &TcpServerPrivate::on_close);
+    d->decreaseTask();
+}
+
+void
+TcpServerPrivate::on_close(uv_handle_t *handle)
+{
+    free(handle);
 }
 
 D_END_NAMESPACE

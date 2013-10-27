@@ -21,6 +21,7 @@ struct TcpConnectionPrivate
     TcpConnection *parent;
     uv_tcp_t *uv_client;
     uv_stream_t *uv_server;
+    ConnectionData *conn_data;
 
     QByteArray buffer;
     int write_status;
@@ -39,6 +40,7 @@ TcpConnection::TcpConnection(TcpServer * parent,
     d->uv_server = data->uv_server;
     d->uv_client = data->uv_client;
     d->uv_client->data = d;
+    d->conn_data = data;
 }
 
 TcpConnection::~TcpConnection()
@@ -57,28 +59,15 @@ TcpConnection::read()
 uint64_t
 TcpConnection::write(const char * data, uint64_t size)
 {
-    // prepare answer
-//    uv_write_t ans;
-    //ans.data = this;
-//    uv_buf_t ansbuf;
-//    ans.buf = uv
-
-//    d->buffer.clear();
-//    d->buffer.push_front(data);
-//    ansbuf.base = (char *)data;
-//    ansbuf.len = size;
-//    debug() << "Size:" << size;
-//    debug() << "Buffer:" << data;
-
-    write_req_t *wr = (write_req_t *)malloc(sizeof(*wr));
+    write_req_t *wr = (write_req_t *)malloc(sizeof(write_req_t));
     wr->req.data = d;
-    wr->buf = uv_buf_init((char *)data, size);
+    wr->buf = uv_buf_init((char *)malloc(size), size);
+    memcpy(wr->buf.base, data, size);
     int r = uv_write(&wr->req, (uv_stream_t *)d->uv_client, &wr->buf, 1, 
                      &TcpConnectionPrivate::on_write);
     return r;
 };
 
-#if 1
 void
 TcpConnectionPrivate::on_write(uv_write_t *req, int status) 
 {
@@ -88,15 +77,16 @@ TcpConnectionPrivate::on_write(uv_write_t *req, int status)
     TcpServer *ts = (TcpServer *)tcp->uv_server->data;
 
     write_req_t *wr = (write_req_t *)req;
+    free(wr->buf.base);
     free(wr);
 
+#if 0
     debug() << "tcp" << tcp;
     debug() << "ts" << ts;
     debug() << "tcp->parent" << tcp->parent;
-    ts->writeFinished(tcp->parent);
-
-}
 #endif
+    ts->writeFinished(tcp->parent);
+}
 
 void
 TcpConnectionPrivate::on_read(uv_stream_t *handle,
@@ -109,9 +99,6 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
         free(buf.base);
         return;
     }
-
-//    debug() << "Bytes read: " << nread;
-//    debug() << "Buffer: " << buf.base;
 
     TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)handle->data;
 
@@ -140,17 +127,9 @@ void
 TcpConnection::close()
 {
     debug() << "Closing";
-    uv_close((uv_handle_t *) d->uv_client,
-             NULL);
-//    free(d->uv_client);
-//   &TcpConnectionPrivate::on_close);
-}
 
-void
-TcpConnectionPrivate::on_close(uv_handle_t *handle)
-{
-    debug() << "Closing";
-    free(handle);
+    TcpServer *ts = (TcpServer *)d->uv_server->data;
+    ts->connectionFinished(d->conn_data);
 }
 
 D_END_NAMESPACE
