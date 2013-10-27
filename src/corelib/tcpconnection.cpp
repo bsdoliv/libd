@@ -11,28 +11,34 @@
 
 D_BEGIN_NAMESPACE
 
+typedef struct {
+    uv_write_t req;
+    uv_buf_t buf;
+} write_req_t;
+
 struct TcpConnectionPrivate
 {
-    TcpServer *tcpserver;
-    ConnectionData *conndata;
+    TcpConnection *parent;
+    uv_tcp_t *uv_client;
+    uv_stream_t *uv_server;
 
     QByteArray buffer;
     int write_status;
 
-    static uv_buf_t alloc_buffer(uv_handle_t *handle, size_t suggested_size);
-    static void read_finished_cb(uv_stream_t *, ssize_t, uv_buf_t);
-    static void write_finished_cb(uv_write_t *req, int status);
-    static void close_finished_cb(uv_handle_t *handle);
+    static uv_buf_t on_alloc_buffer(uv_handle_t *handle, size_t suggested_size);
+    static void on_read(uv_stream_t *handle, ssize_t, uv_buf_t);
+    static void on_write(uv_write_t *req, int status);
+    static void on_close(uv_handle_t *handle);
 };
 
 TcpConnection::TcpConnection(TcpServer * parent, 
                              ConnectionData * data) :
     d(new TcpConnectionPrivate)
 {
-    data->tcpconn = this;
-    d->conndata = data;
-    d->tcpserver = parent;
-    d->conndata->uv_client->data = this;
+    d->parent = this;
+    d->uv_server = data->uv_server;
+    d->uv_client = data->uv_client;
+    d->uv_client->data = d;
 }
 
 TcpConnection::~TcpConnection()
@@ -41,84 +47,85 @@ TcpConnection::~TcpConnection()
 }
 
 void
-TcpConnection::setConnectionData(ConnectionData * cdata)
-{
-    d->conndata = cdata;
-}
-
-void
 TcpConnection::read()
 {
-    ConnectionData *cd = (ConnectionData *)d->conndata;
-    uv_read_start((uv_stream_t *)cd->uv_client,
-                  &TcpConnectionPrivate::alloc_buffer,
-                  &TcpConnectionPrivate::read_finished_cb);
+    uv_read_start((uv_stream_t *)d->uv_client,
+                  &TcpConnectionPrivate::on_alloc_buffer,
+                  &TcpConnectionPrivate::on_read);
 }
 
 uint64_t
 TcpConnection::write(const char * data, uint64_t size)
 {
     // prepare answer
-    uv_write_t ans;
+//    uv_write_t ans;
     //ans.data = this;
-    uv_buf_t ansbuf;
+//    uv_buf_t ansbuf;
+//    ans.buf = uv
 
-    d->buffer.clear();
-    d->buffer.push_front(data);
-    ansbuf.base = (char *)data;
-    ansbuf.len = size;
-    debug() << "Size:" << size;
-    debug() << "Buffer:" << data;
+//    d->buffer.clear();
+//    d->buffer.push_front(data);
+//    ansbuf.base = (char *)data;
+//    ansbuf.len = size;
+//    debug() << "Size:" << size;
+//    debug() << "Buffer:" << data;
 
-    ConnectionData *cd = (ConnectionData *)d->conndata;
-    int r = uv_write(&ans, (uv_stream_t *)cd->uv_client, &ansbuf, 1, 
-                     NULL);
-                     //&TcpConnectionPrivate::write_finished_cb);
-    (uv_handle_t *)
-    cd->uv_client->data = 0;
-    uv_close((uv_handle_t *) cd->uv_client, NULL);
+    write_req_t *wr = (write_req_t *)malloc(sizeof(*wr));
+    wr->req.data = d;
+    wr->buf = uv_buf_init((char *)data, size);
+    int r = uv_write(&wr->req, (uv_stream_t *)d->uv_client, &wr->buf, 1, 
+                     &TcpConnectionPrivate::on_write);
     return r;
 };
 
 #if 1
 void
-TcpConnectionPrivate::write_finished_cb(uv_write_t *req, int status) 
+TcpConnectionPrivate::on_write(uv_write_t *req, int status) 
 {
     debug() << "Status: " << status;
-    TcpConnection *tc = (TcpConnection *)req->data;
-    tc->d->write_status = status;
-    tc->d->tcpserver->writeFinished(tc);
+
+    TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)req->data;
+    TcpServer *ts = (TcpServer *)tcp->uv_server->data;
+
+    write_req_t *wr = (write_req_t *)req;
+    free(wr);
+
+    debug() << "tcp" << tcp;
+    debug() << "ts" << ts;
+    debug() << "tcp->parent" << tcp->parent;
+    ts->writeFinished(tcp->parent);
+
 }
 #endif
 
 void
-TcpConnectionPrivate::read_finished_cb(uv_stream_t *server,
-                                       ssize_t nread,
-                                       uv_buf_t buf)
+TcpConnectionPrivate::on_read(uv_stream_t *handle,
+                              ssize_t nread,
+                              uv_buf_t buf)
 {
     if (nread == -1) {
         debug() << "Buffer crappy";
-        uv_close((uv_handle_t *) server, NULL);
+        uv_close((uv_handle_t *) handle, NULL);
         free(buf.base);
         return;
     }
 
-    debug() << "Bytes read: " << nread;
-    debug() << "Buffer: " << buf.base;
+//    debug() << "Bytes read: " << nread;
+//    debug() << "Buffer: " << buf.base;
 
-    TcpConnection *tc = (TcpConnection *)server->data;
+    TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)handle->data;
 
-    tc->d->buffer += buf.base;
+    tcp->buffer += buf.base;
 
-    uv_read_stop(server);
+    uv_read_stop(handle);
     free(buf.base);
 
-    debug() << "Server pointer:" << server;
-    tc->d->tcpserver->readFinished(tc);
+    TcpServer *ts = (TcpServer *)tcp->uv_server->data;
+    ts->readFinished(tcp->parent);
 }
 
 uv_buf_t 
-TcpConnectionPrivate::alloc_buffer(uv_handle_t *handle, size_t suggested_size) 
+TcpConnectionPrivate::on_alloc_buffer(uv_handle_t *handle, size_t suggested_size) 
 {
     return uv_buf_init((char*)malloc(suggested_size), suggested_size);
 }
@@ -132,16 +139,18 @@ TcpConnection::buffer()
 void
 TcpConnection::close()
 {
-    ConnectionData *cd = (ConnectionData *)d->conndata;
-//    uv_shutdown_t shutdown_req;
-//    uv_shutdown(&shutdown_req, (uv_stream_t *) cd->uv_client, NULL);
-    uv_close((uv_handle_t *) cd->uv_client, NULL);
+    debug() << "Closing";
+    uv_close((uv_handle_t *) d->uv_client,
+             NULL);
+//    free(d->uv_client);
+//   &TcpConnectionPrivate::on_close);
 }
 
 void
-TcpConnectionPrivate::close_finished_cb(uv_handle_t *)
+TcpConnectionPrivate::on_close(uv_handle_t *handle)
 {
-    debug() << "teste";
+    debug() << "Closing";
+    free(handle);
 }
 
 D_END_NAMESPACE

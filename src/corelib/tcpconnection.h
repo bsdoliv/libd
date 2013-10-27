@@ -16,9 +16,6 @@ public:
     TcpConnection(TcpServer * parent, ConnectionData * data = 0);
     virtual ~TcpConnection();
     
-    ConnectionData *connectionData();
-    void setConnectionData(ConnectionData * cdata);
-    
     void read();
     uint64_t write(const char * data, uint64_t size);
     void close();

@@ -21,8 +21,8 @@ D_BEGIN_NAMESPACE
 
 #define MAXTASKS 4
 struct TcpServerPrivate {
-    uv_tcp_t server;
     TcpServer *parent;
+    uv_tcp_t uv_server;
 
     uint16_t port;
     HostAddress bind_address;
@@ -34,7 +34,7 @@ struct TcpServerPrivate {
     uv_work_t req[MAXTASKS];
     ConnectionData conns_databucket[MAXTASKS];
 
-    void enqueueConnection(uv_tcp_t *client);
+    void enqueueConnection(uv_stream_t *server, uv_tcp_t *client);
     static void handle_accept_cb(uv_stream_t *, int);
     static void newconnection_cb(uv_work_t *req);
     static void connection_finished_cb(uv_work_t *req, int status);
@@ -43,13 +43,15 @@ struct TcpServerPrivate {
 void
 TcpServerPrivate::newconnection_cb(uv_work_t * req)
 {
+#if 0
     ConnectionData *td = (ConnectionData *)req->data;
     TcpServer *ts = (TcpServer *)td->tcpserver;
     ts->newConnection(new TcpConnection(ts, td));
+#endif
 }
 
 void 
-TcpServerPrivate::enqueueConnection(uv_tcp_t *client)
+TcpServerPrivate::enqueueConnection(uv_stream_t *server, uv_tcp_t *client)
 {
     uvMutexLocker(&parent->d->mtx);
     ++curtask;
@@ -58,20 +60,26 @@ TcpServerPrivate::enqueueConnection(uv_tcp_t *client)
     td->clear();
     td->id = curtask;
     td->uv_client = client;
-    td->tcpserver = parent;
-    req[curtask].data = (void *)td;
+    td->uv_server = server;
+//    req[curtask].data = (void *)td;
 
+//    ConnectionData *td = (ConnectionData *)req->data;
+//    TcpServer *ts = (TcpServer *)td->tcpserver;
+    parent->newConnection(new TcpConnection(parent, td));
+#if 0
     uv_queue_work(uv_default_loop(), 
                     &req[curtask],
                     newconnection_cb,
                     connection_finished_cb);
 
     debug() << "Connection spawned:" << td->id;
+#endif
 }
 
 void
 TcpServerPrivate::connection_finished_cb(uv_work_t *req, int status)
 {
+#if 0
     ConnectionData *td = (ConnectionData *)req->data;
     TcpServer *ts = (TcpServer *)td->tcpserver;
 
@@ -79,6 +87,7 @@ TcpServerPrivate::connection_finished_cb(uv_work_t *req, int status)
     --ts->d->curtask;
 
     debug() << "Connection finished: " << td->id;
+#endif
 }
 
 TcpServer::TcpServer() : 
@@ -105,20 +114,20 @@ TcpServer::listen(const HostAddress &address, uint16_t port)
     d->bind_address = address;
 
     uv_loop_t *loop = defaultLoop()->uv_loop();
-    uv_tcp_init(loop, &d->server);
+    uv_tcp_init(loop, &d->uv_server);
 
     struct sockaddr_in bind_addr = uv_ip4_addr(address.toString().toLatin1(),
                                                port);
-    uv_tcp_bind(&d->server, bind_addr);
-    d->server.data = this;
-    int r = uv_listen((uv_stream_t *)&d->server, 128,
+    uv_tcp_bind(&d->uv_server, bind_addr);
+    d->uv_server.data = this;
+    int r = uv_listen((uv_stream_t *)&d->uv_server, 128,
                       &TcpServerPrivate::handle_accept_cb);
     if (r != 0) {
         debug() << "Listen error" << ::uv_err_name(uv_last_error(loop));
         return (d->listening = false);
     }
 
-    uv_tcp_simultaneous_accepts(&d->server, 1);
+    uv_tcp_simultaneous_accepts(&d->uv_server, 1);
     return (d->listening = true);
 }
 
@@ -126,8 +135,9 @@ void
 TcpServerPrivate::handle_accept_cb(uv_stream_t *server, int status)
 {
     assert(server);
-    TcpServer *s = (TcpServer *)server->data;
-    if (s->d->curtask >= MAXTASKS) {
+    TcpServer *ts = (TcpServer *)server->data;
+    
+    if (ts->d->curtask >= MAXTASKS) {
         debug() << "Too many tasks, no room to handle this one.";
         return;
     }
@@ -142,9 +152,9 @@ TcpServerPrivate::handle_accept_cb(uv_stream_t *server, int status)
     
     uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
     uv_tcp_init(uv_default_loop(), client);
-    if (uv_accept((uv_stream_t *)&s->d->server,
+    if (uv_accept((uv_stream_t *)server,
                   (uv_stream_t *)client) == 0) {
-        s->d->enqueueConnection(client);
+        ts->d->enqueueConnection(server, client);
     } else {
         uv_close((uv_handle_t *)client, NULL);
         return;

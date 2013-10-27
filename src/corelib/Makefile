@@ -8,7 +8,7 @@ CXXFLAGS+=	-std=c++0x
 CXXFLAGS+=	-I${ABSTOP}/contrib/libuv/include
 CXXFLAGS+=	-I${ABSTOP}/contrib/qtbase
 CXXFLAGS+=	-I${DEST_DIR}/include/qt
-#CXXFLAGS+=	-ggdb3
+CXXFLAGS+=	-ggdb3
 LDSTATIC= 	-static
 LIB=		dcore
 

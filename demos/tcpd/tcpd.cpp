@@ -4,7 +4,7 @@
 
 #include <qt/qdebug.h>
 
-#define debug() qDebug() << Q_FUNC_INFO
+#define debug() qDebug() << __FILE__ << ":" << __LINE__ << Q_FUNC_INFO
 
 Tcpd::Tcpd() : TcpServer() { }
 
@@ -33,7 +33,6 @@ Tcpd::readFinished(TcpConnection *c)
 
     QByteArray reply("OK\n");
     uint64_t r = c->write(reply.data(), reply.size());
-
     debug() << "write result" << r;
     //c->close();
 }
@@ -42,4 +41,6 @@ void
 Tcpd::writeFinished(TcpConnection *c)
 { 
     debug() << "write finished";
+    c->close();
+    delete c;
 }
