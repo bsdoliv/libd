@@ -4,6 +4,8 @@
 
 #include <qt/qdebug.h>
 
+#include <unistd.h>
+
 #define debug() qDebug() << __FILE__ << ":" << __LINE__ << Q_FUNC_INFO
 
 Tcpd::Tcpd() : TcpServer() { }
@@ -20,27 +22,40 @@ Tcpd::run()
 void 
 Tcpd::newConnection(TcpConnection *c)
 {
-    debug() << "Master I'm here to serve you";
-    // by the and, will call readFinished();
-    c->read(); 
+    //debug() << "new connection";
+    QByteArray *m_buffer = new QByteArray;
+    c->read(m_buffer); 
 }
 
 void 
 Tcpd::readFinished(TcpConnection *c)
 { 
-    debug() << "read finished";
-    debug() << "buffer" << c->buffer()->data();
+//    debug() << "read finished";
+    //debug() << "status" << c->status();
+    QByteArray *m_buffer = c->buffer();
+    if (c->status() != TcpConnection::ReadOk) {
+        c->close();
+//        delete c;
+        delete m_buffer;
+        return;
+    }
 
+    debug() << "buffer" << m_buffer->size();
+    debug() << "buffer" << "*** omitting data";
+
+    //sleep(3);
     QByteArray reply("OK\n");
     uint64_t r = c->write(reply.data(), reply.size());
-    debug() << "write result" << r;
+
+//    debug() << "write result" << r;
     //c->close();
+    delete m_buffer;
 }
 
 void 
 Tcpd::writeFinished(TcpConnection *c)
 { 
-    debug() << "write finished";
+    //debug() << "write finished";
     c->close();
-    delete c;
+//    delete c;
 }

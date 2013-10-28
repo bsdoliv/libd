@@ -16,7 +16,7 @@ public:
     int exec();
     virtual void run() = 0;
 
-protected:
+//protected:
     EventLoop *defaultLoop();
 
 private:

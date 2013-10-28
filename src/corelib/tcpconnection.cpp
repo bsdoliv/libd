@@ -2,6 +2,7 @@
 #include "tcpconnection_p.h"
 #include "tcpconnection.h"
 #include "tools.h"
+#include "daemon_p.h"
 
 #define TCPCONNECTION_DEBUG
 
@@ -23,8 +24,8 @@ struct TcpConnectionPrivate
     uv_stream_t *uv_server;
     ConnectionData *conn_data;
 
-    QByteArray buffer;
-    int write_status;
+    QByteArray *read_buffer;
+    int op_status;
 
     static uv_buf_t on_alloc_buffer(uv_handle_t *handle, size_t suggested_size);
     static void on_read(uv_stream_t *handle, ssize_t, uv_buf_t);
@@ -49,8 +50,9 @@ TcpConnection::~TcpConnection()
 }
 
 void
-TcpConnection::read()
+TcpConnection::read(QByteArray *buffer)
 {
+    d->read_buffer = buffer;
     uv_read_start((uv_stream_t *)d->uv_client,
                   &TcpConnectionPrivate::on_alloc_buffer,
                   &TcpConnectionPrivate::on_read);
@@ -71,7 +73,7 @@ TcpConnection::write(const char * data, uint64_t size)
 void
 TcpConnectionPrivate::on_write(uv_write_t *req, int status) 
 {
-    debug() << "Status: " << status;
+//    debug() << "Status: " << status;
 
     TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)req->data;
     TcpServer *ts = (TcpServer *)tcp->uv_server->data;
@@ -93,21 +95,26 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
                               ssize_t nread,
                               uv_buf_t buf)
 {
+    TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)handle->data;
+    TcpServer *ts = (TcpServer *)tcp->uv_server->data;
+
     if (nread == -1) {
-        debug() << "Buffer crappy";
-        uv_close((uv_handle_t *) handle, NULL);
-        free(buf.base);
-        return;
+        if (uv_last_error(ts->defaultLoop()->uv_loop()).code == UV_EOF) {
+            debug() << "EOF: discarding connection";
+            tcp->op_status = TcpConnection::ReadFail;
+            ts->closeConnection(tcp->conn_data);
+        }
     }
 
-    TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)handle->data;
+    if (nread > 0) {
+        tcp->read_buffer->append(buf.base);
+        uv_read_stop(handle);
+        tcp->op_status = TcpConnection::ReadOk;
+    }
 
-    tcp->buffer += buf.base;
+    if (buf.base)
+        free(buf.base);
 
-    uv_read_stop(handle);
-    free(buf.base);
-
-    TcpServer *ts = (TcpServer *)tcp->uv_server->data;
     ts->readFinished(tcp->parent);
 }
 
@@ -117,19 +124,24 @@ TcpConnectionPrivate::on_alloc_buffer(uv_handle_t *handle, size_t suggested_size
     return uv_buf_init((char*)malloc(suggested_size), suggested_size);
 }
 
-QByteArray *
-TcpConnection::buffer()
-{
-    return &d->buffer;
-}
-
 void
 TcpConnection::close()
 {
-    debug() << "Closing";
-
+    //debug() << "Closing";
     TcpServer *ts = (TcpServer *)d->uv_server->data;
-    ts->connectionFinished(d->conn_data);
+    ts->closeConnection(d->conn_data);
+}
+
+int
+TcpConnection::status()
+{
+    return d->op_status;
+}
+
+QByteArray *
+TcpConnection::buffer()
+{
+    return d->read_buffer;
 }
 
 D_END_NAMESPACE

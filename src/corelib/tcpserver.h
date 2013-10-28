@@ -70,7 +70,7 @@ public:
     AbstractSocket::SocketError serverError() const;
     QString errorString() const;
     virtual void newConnection(TcpConnection * c) = 0;
-    void connectionFinished(ConnectionData * data);
+    void closeConnection(ConnectionData * data);
 
 private:
     friend class TcpServerPrivate;

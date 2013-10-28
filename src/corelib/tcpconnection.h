@@ -16,11 +16,17 @@ public:
     TcpConnection(TcpServer * parent, ConnectionData * data = 0);
     virtual ~TcpConnection();
     
-    void read();
+    void read(QByteArray *buffer);
     uint64_t write(const char * data, uint64_t size);
     void close();
-
     QByteArray *buffer();
+
+    int status();
+
+    enum Status {
+        ReadOk = 0,
+        ReadFail
+    };
 
 private:
     TcpConnectionPrivate *d;
