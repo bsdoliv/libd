@@ -9,8 +9,8 @@ class TcpConnection;
 class IOObject
 {
 public:
-    virtual void readFinished(TcpConnection *) = 0;
-    virtual void writeFinished(TcpConnection *) = 0;
+    virtual void readFinished(TcpConnection *);
+    virtual void writeFinished(TcpConnection *);
 };
 
 D_END_NAMESPACE

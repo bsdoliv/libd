@@ -2,6 +2,7 @@
 #define TCPCONNECTION_H
 
 #include "dglobal.h"
+#include "ioobject.h"
 
 #include <inttypes.h>
 
@@ -10,7 +11,7 @@ D_BEGIN_NAMESPACE
 class ConnectionData;
 class TcpServer;
 struct TcpConnectionPrivate;
-class TcpConnection
+class TcpConnection : public IOObject
 {
 public:
     TcpConnection(TcpServer * parent, ConnectionData * data = 0);

@@ -28,7 +28,6 @@
 #define DTCPSERVER_H
 
 #include "daemon.h"
-#include "ioobject.h"
 #include "abstractsocket.h"
 #include "hostaddress.h"
 
@@ -40,7 +39,7 @@ D_BEGIN_NAMESPACE
 class TcpServerPrivate;
 class TcpConnection;
 class ConnectionData;
-class TcpServer : public Daemon, public IOObject
+class TcpServer : public Daemon
 {
 public:
     explicit TcpServer();
@@ -53,10 +52,8 @@ public:
 
     bool isListening() const;
 
-#if 0
-    void setMaxPendingConnections(int numConnections);
-    int maxPendingConnections() const;
-#endif
+    void setMaxConnections(int numConnections);
+    int maxConnections() const;
 
     uint16_t port() const;
     HostAddress address() const;

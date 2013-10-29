@@ -76,7 +76,6 @@ TcpConnectionPrivate::on_write(uv_write_t *req, int status)
 //    debug() << "Status: " << status;
 
     TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)req->data;
-    TcpServer *ts = (TcpServer *)tcp->uv_server->data;
 
     write_req_t *wr = (write_req_t *)req;
     free(wr->buf.base);
@@ -87,7 +86,7 @@ TcpConnectionPrivate::on_write(uv_write_t *req, int status)
     debug() << "ts" << ts;
     debug() << "tcp->parent" << tcp->parent;
 #endif
-    ts->writeFinished(tcp->parent);
+    tcp->parent->writeFinished(tcp->parent);
 }
 
 void
@@ -115,7 +114,7 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
     if (buf.base)
         free(buf.base);
 
-    ts->readFinished(tcp->parent);
+    tcp->parent->readFinished(tcp->parent);
 }
 
 uv_buf_t 

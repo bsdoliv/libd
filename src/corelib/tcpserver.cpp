@@ -1,3 +1,29 @@
+/****************************************************************************
+**
+** Copyright (C) 2013 Andre Oliveira
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+**
+****************************************************************************/
+
 #include "tcpserver.h"
 #include "uvwrapper.h"
 #include "daemon_p.h"
@@ -21,7 +47,11 @@ D_BEGIN_NAMESPACE
 
 #define MAXCONNS 4
 
-struct TcpServerPrivate {
+struct TcpServerPrivate 
+{
+
+
+    int max_conns;
     TcpServer *parent;
     uv_tcp_t uv_server;
 
@@ -31,49 +61,50 @@ struct TcpServerPrivate {
     int conns;
     bool listening;
 
-    uv_mutex_t mtx;
-//    ConnectionData conns_databucket[MAXTASKS];
+    uv_mutex_t conntbl_mtx;
+    uv_mutex_t enq_mtx;
+    uv_mutex_t read_mtx;
+    uv_mutex_t write_mtx;
 
     QHash<QByteArray, ConnectionData *> conntable;
     void enqueueConnection(uv_stream_t *server, uv_tcp_t *client);
-    ConnectionData * addConnection(uv_tcp_t *client)
+    QByteArray getPeerNamePort(uv_tcp_t *client)
     {
+        uvMutexLocker(&this->enq_mtx);
         struct sockaddr sa;
-//        char addr[128];
         int len;
         memset(&sa, 0x0, sizeof(sa));
-//        memset(addr, 0x0, 128);
         int r;
         r = uv_tcp_getsockname(client, &sa, &len);
         debug() << "getsock" << r;
         r = uv_tcp_getpeername(client, &sa, &len);
         debug() << "getpeer" << r;
         struct sockaddr_in sain = *(struct sockaddr_in *)&sa;
-//        uv_ip4_name(&sain, addr, sizeof(addr));
 
-        HostAddress peer_address(&sa);
-        QByteArray peer_port = QByteArray::number(ntohs(sain.sin_port));
-//        debug() << "peer_address"  << peer_address;
-//        debug() << "peer_port"  << peer_port;
-        if (peer_address.isNull() || peer_port == "0") {
+        QByteArray res;
+        res += 
+                HostAddress(&sa).toString().toLatin1() % ":" % 
+                QByteArray::number(ntohs(sain.sin_port));
+        if (res == ":0" || ntohs(sain.sin_port) <= 0) { 
+            res.clear();
             debug() << "*** ERROR *** couldn't retrieve peer address or port";
-            return 0;
         }
 
-        ConnectionData *cd = new ConnectionData;
-        cd->id = peer_address.toString().toLatin1() % ":" % peer_port;
-        cd->uv_client = client;
-        cd->uv_server = (uv_stream_t *)&this->uv_server;
+        return res;
+    }
+
+    void addConnection(ConnectionData *cd)
+    {
+        uvMutexLocker(&this->conntbl_mtx);
         conntable.insert(cd->id, cd);
         ++conns;
-        return cd;
     };
 
     void removeConnection(ConnectionData *cd)
     {
-        uvMutexLocker(&this->mtx);
+        uvMutexLocker(&this->conntbl_mtx);
         ConnectionData *c = conntable.take(cd->id);
-        //delete c;
+        delete c;
         --conns;
     };
 
@@ -90,14 +121,19 @@ TcpServerPrivate::on_enqueue(uv_work_t *req)
     assert(client);
     TcpServerPrivate *d = (TcpServerPrivate *)client->data;
     assert(d);
-    uvMutexLocker(&d->mtx);
-    ConnectionData *cd = d->addConnection(client);
-    if (cd == 0) {
+
+    ConnectionData *cd = new ConnectionData;
+    d->addConnection(cd);
+    cd->id = d->getPeerNamePort(client);
+    if (cd->id.isNull()) {
         uv_close((uv_handle_t *)client, 
                  &TcpServerPrivate::on_close);
         debug() << "failure initializing connection";
         return;
     }
+
+    cd->uv_client = client;
+    cd->uv_server = (uv_stream_t *)&d->uv_server;
 
     debug() << "Connection task" << cd->id;
     debug() << "table size" << d->conntable.size();
@@ -123,12 +159,14 @@ TcpServer::TcpServer() :
     d->conns = 0;
     d->listening = false;
     d->parent = this;
-    uv_mutex_init(&d->mtx);
+    uv_mutex_init(&d->conntbl_mtx);
+    uv_mutex_init(&d->enq_mtx);
 }
 
 TcpServer::~TcpServer() 
 { 
-    uv_mutex_destroy(&d->mtx);
+    uv_mutex_destroy(&d->enq_mtx);
+    uv_mutex_destroy(&d->conntbl_mtx);
     delete d;
 }
 
@@ -229,13 +267,25 @@ TcpServer::closeConnection(ConnectionData * data)
 void
 TcpServerPrivate::on_close(uv_handle_t *handle)
 {
-//    free(handle);
+    free(handle);
 }
 
 void
 TcpServerPrivate::on_enqueue_finished(uv_work_t *handle, int status)
 {
-//    free(handle);
+    free(handle);
+}
+
+void
+TcpServer::setMaxConnections(int numConnections)
+{
+    d->max_conns = numConnections;
+}
+
+int
+TcpServer::maxConnections() const
+{
+    d->max_conns;
 }
 
 D_END_NAMESPACE

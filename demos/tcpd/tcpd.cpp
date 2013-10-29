@@ -25,11 +25,13 @@ Tcpd::newConnection(TcpConnection *c)
     //debug() << "new connection";
     QByteArray *m_buffer = new QByteArray;
     c->read(m_buffer); 
+    new Connection(c);
 }
 
 void 
-Tcpd::readFinished(TcpConnection *c)
+Connection::readFinished(TcpConnection *c)
 { 
+    TcpServer::readLock();
 //    debug() << "read finished";
     //debug() << "status" << c->status();
     QByteArray *m_buffer = c->buffer();
@@ -53,7 +55,7 @@ Tcpd::readFinished(TcpConnection *c)
 }
 
 void 
-Tcpd::writeFinished(TcpConnection *c)
+Connection::writeFinished(TcpConnection *c)
 { 
     //debug() << "write finished";
     c->close();
