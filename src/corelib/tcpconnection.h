@@ -23,6 +23,7 @@ public:
     QByteArray *buffer();
 
     int status();
+    bool wait(int timeout = 0);
 
     enum Status {
         ReadOk = 0,

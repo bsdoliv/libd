@@ -23,6 +23,7 @@ struct TcpConnectionPrivate
     uv_tcp_t *uv_client;
     uv_stream_t *uv_server;
     ConnectionData *conn_data;
+    int read_count;
 
     QByteArray *read_buffer;
     int op_status;
@@ -42,6 +43,7 @@ TcpConnection::TcpConnection(TcpServer * parent,
     d->uv_client = data->uv_client;
     d->uv_client->data = d;
     d->conn_data = data;
+    d->read_count = 0;
 }
 
 TcpConnection::~TcpConnection()
@@ -114,7 +116,9 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
     if (buf.base)
         free(buf.base);
 
-    tcp->parent->readFinished(tcp->parent);
+    tcp->read_count++;
+//  TODO notification mechanism
+//    tcp->parent->readFinished(tcp->parent);
 }
 
 uv_buf_t 
@@ -141,6 +145,19 @@ QByteArray *
 TcpConnection::buffer()
 {
     return d->read_buffer;
+}
+
+bool
+TcpConnection::wait(int timeout)
+{
+    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+
+    if (d->read_count > 0) {
+        d->read_count--;
+        return true;
+    }
+
+    return false;
 }
 
 D_END_NAMESPACE
