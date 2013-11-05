@@ -11,7 +11,7 @@ D_BEGIN_NAMESPACE
 class ConnectionData;
 class TcpServer;
 struct TcpConnectionPrivate;
-class TcpConnection : public IOObject
+class TcpConnection// : public IOObject
 {
 public:
     TcpConnection(TcpServer * parent, ConnectionData * data = 0);

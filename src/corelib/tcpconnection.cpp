@@ -32,6 +32,7 @@ struct TcpConnectionPrivate
     static void on_read(uv_stream_t *handle, ssize_t, uv_buf_t);
     static void on_write(uv_write_t *req, int status);
     static void on_close(uv_handle_t *handle);
+    static void on_wait(uv_timer_t *handle, int status);
 };
 
 TcpConnection::TcpConnection(TcpServer * parent, 
@@ -87,8 +88,8 @@ TcpConnectionPrivate::on_write(uv_write_t *req, int status)
     debug() << "tcp" << tcp;
     debug() << "ts" << ts;
     debug() << "tcp->parent" << tcp->parent;
-#endif
     tcp->parent->writeFinished(tcp->parent);
+#endif
 }
 
 void
@@ -150,7 +151,16 @@ TcpConnection::buffer()
 bool
 TcpConnection::wait(int timeout)
 {
-    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+    uv_loop_t *loop = uv_default_loop();
+    uv_stop(loop);
+#if 1
+    uv_timer_t idler;
+    idler.data = d;
+    uv_timer_init(loop, &idler);
+    uv_timer_start(&idler, &TcpConnectionPrivate::on_wait, 5000, 0);
+#endif
+
+    uv_run(loop, UV_RUN_DEFAULT);
 
     if (d->read_count > 0) {
         d->read_count--;
@@ -158,6 +168,17 @@ TcpConnection::wait(int timeout)
     }
 
     return false;
+}
+
+void 
+TcpConnectionPrivate::on_wait(uv_timer_t *handle, int status)
+{
+    static int64_t counter = 0;
+
+    if (++counter >= 10e6) {
+        uv_timer_stop(handle);
+        counter = 0;
+    }
 }
 
 D_END_NAMESPACE

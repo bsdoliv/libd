@@ -93,12 +93,14 @@ struct TcpServerPrivate
         return res;
     }
 
+#if 0
     void addConnection(ConnectionData *cd)
     {
         uvMutexLocker(&this->conntbl_mtx);
         conntable.insert(cd->id, cd);
         ++conns;
     };
+#endif
 
     void removeConnection(ConnectionData *cd)
     {
@@ -109,18 +111,16 @@ struct TcpServerPrivate
     };
 
     static void handle_accept_cb(uv_stream_t *, int);
-    static void on_enqueue(uv_work_t *);
-    static void on_enqueue_finished(uv_work_t *, int);
+//    static void on_enqueue(uv_work_t *);
     static void on_close(uv_handle_t *);
 };
 
+#if 0
 void
 TcpServerPrivate::on_enqueue(uv_work_t *req)
 {
     uv_tcp_t *client = (uv_tcp_t *)req->data;
-    assert(client);
     TcpServerPrivate *d = (TcpServerPrivate *)client->data;
-    assert(d);
 
     ConnectionData *cd = new ConnectionData;
     d->addConnection(cd);
@@ -139,18 +139,30 @@ TcpServerPrivate::on_enqueue(uv_work_t *req)
     debug() << "table size" << d->conntable.size();
     d->parent->newConnection(new TcpConnection(d->parent, cd));
 }
+#endif
 
 void 
 TcpServerPrivate::enqueueConnection(uv_stream_t *server, uv_tcp_t *client)
 {
-    uv_work_t *req = (uv_work_t *)malloc(sizeof(uv_work_t));
-    client->data = this;
-    req->data = client;
+    assert(client);
+    assert(server);
 
-    uv_queue_work(parent->defaultLoop()->uv_loop(),
-                  req,
-                  on_enqueue,
-                  on_enqueue_finished);
+    ConnectionData *cd = new ConnectionData;
+//    addConnection(cd);
+    cd->id = getPeerNamePort(client);
+    if (cd->id.isNull()) {
+        uv_close((uv_handle_t *)client, 
+                 &TcpServerPrivate::on_close);
+        debug() << "failure initializing connection";
+        return;
+    }
+
+    cd->uv_client = client;
+    cd->uv_server = (uv_stream_t *)server;
+
+    debug() << "Connection task" << cd->id;
+    debug() << "table size" << conntable.size();
+    parent->newConnection(new TcpConnection(parent, cd));
 }
 
 TcpServer::TcpServer() : 
@@ -261,17 +273,11 @@ TcpServer::closeConnection(ConnectionData * data)
     uv_close((uv_handle_t *) data->uv_client, 
              &TcpServerPrivate::on_close);
     debug() << "Connection Task:" << data->id << "finished";
-    d->removeConnection(data);
+//    d->removeConnection(data);
 }
 
 void
 TcpServerPrivate::on_close(uv_handle_t *handle)
-{
-    free(handle);
-}
-
-void
-TcpServerPrivate::on_enqueue_finished(uv_work_t *handle, int status)
 {
     free(handle);
 }
