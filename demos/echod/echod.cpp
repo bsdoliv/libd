@@ -1,4 +1,4 @@
-#include "tcpd.h"
+#include "echod.h"
 
 #include <TcpConnection>
 
@@ -8,36 +8,29 @@
 
 #define debug() qDebug() << __FILE__ << ":" << __LINE__ << Q_FUNC_INFO
 
-Tcpd::Tcpd() : TcpServer() { }
+Echod::Echod() : TcpServer() { }
 
-Tcpd::~Tcpd() { }
+Echod::~Echod() { }
 
 void 
-Tcpd::run()
+Echod::run()
 {
     debug() << "Starting...";
     debug() << "Listening on" << port();
 }
 
 void 
-Tcpd::newConnection(TcpConnection *c)
+Echod::newConnection(TcpConnection *c)
 {
-    //debug() << "new connection";
+    debug() << "new connection";
     QByteArray *m_buffer = new QByteArray;
     c->read(m_buffer); 
-    new Connection(c);
-}
+    debug() << "waiting" << c->wait();
 
-void 
-Connection::readFinished(TcpConnection *c)
-{ 
-    TcpServer::readLock();
-//    debug() << "read finished";
-    //debug() << "status" << c->status();
-    QByteArray *m_buffer = c->buffer();
+//    QByteArray *m_buffer = c->buffer();
     if (c->status() != TcpConnection::ReadOk) {
         c->close();
-//        delete c;
+        delete c;
         delete m_buffer;
         return;
     }
@@ -49,15 +42,7 @@ Connection::readFinished(TcpConnection *c)
     QByteArray reply("OK\n");
     uint64_t r = c->write(reply.data(), reply.size());
 
-//    debug() << "write result" << r;
-    //c->close();
-    delete m_buffer;
-}
-
-void 
-Connection::writeFinished(TcpConnection *c)
-{ 
-    //debug() << "write finished";
+    debug() << "write result" << r;
     c->close();
-//    delete c;
+    delete m_buffer;
 }
