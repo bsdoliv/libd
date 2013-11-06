@@ -145,6 +145,7 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
     }
 
     if (nread > 0) {
+        //read_buffer->resize(nread);
         read_buffer->append(buf.base);
         uv_read_stop(handle);
         tcpriv->op_status = TcpConnection::ReadOk;
