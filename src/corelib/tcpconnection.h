@@ -11,7 +11,7 @@ D_BEGIN_NAMESPACE
 class ConnectionData;
 class TcpServer;
 struct TcpConnectionPrivate;
-class TcpConnection// : public IOObject
+class TcpConnection
 {
 public:
     TcpConnection(TcpServer * parent, ConnectionData * data = 0);
@@ -21,7 +21,6 @@ public:
     bool timedRead(QByteArray *buffer, int timeout = 0);
     uint64_t write(const char * data, uint64_t size);
     void close();
-    QByteArray *buffer();
 
     int status();
 
