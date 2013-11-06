@@ -23,26 +23,28 @@ void
 Echod::newConnection(TcpConnection *c)
 {
     debug() << "new connection";
-    QByteArray *m_buffer = new QByteArray;
-    c->timedRead(m_buffer, 5000); 
+    QByteArray request;
+    request.clear();
+    c->timedRead(&request, 5000); 
 
-//    QByteArray *m_buffer = c->buffer();
     if (c->status() != TcpConnection::ReadOk) {
         debug() << "read failed";
-        c->close();
-        delete c;
-        delete m_buffer;
-        return;
+        return cleanup(c);
     }
 
-    debug() << "buffer" << m_buffer->size();
     debug() << "buffer" << "*** omitting data";
+    debug() << "buffer size" << request.size();
 
-    //sleep(3);
-    QByteArray reply("OK\n");
-    uint64_t r = c->write(reply.data(), reply.size());
+    uint64_t r = c->write(request.data(), request.size());
 
     debug() << "write result" << r;
+    return cleanup(c);
+}
+
+void
+Echod::cleanup(TcpConnection *c)
+{
     c->close();
-    delete m_buffer;
+    delete c;
+    c = 0;
 }

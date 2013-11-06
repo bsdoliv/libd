@@ -12,6 +12,7 @@ public:
 
     void run();
     void newConnection(TcpConnection *c);
+    void cleanup(TcpConnection *c);
 };
 
 #endif // !ECHOD_H
