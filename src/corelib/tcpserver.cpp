@@ -273,6 +273,7 @@ TcpServer::closeConnection(ConnectionData * data)
     uv_close((uv_handle_t *) data->uv_client, 
              &TcpServerPrivate::on_close);
     debug() << "Connection Task:" << data->id << "finished";
+    delete data;
 //    d->removeConnection(data);
 }
 

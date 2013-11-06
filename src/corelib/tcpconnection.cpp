@@ -19,6 +19,11 @@ typedef struct {
     uv_buf_t buf;
 } write_req_t;
 
+typedef struct {
+    TcpConnectionPrivate *tcpriv;
+    QByteArray *read_buffer;
+} read_req_t;
+
 struct TcpConnectionPrivate
 {
     TcpConnection *parent;
@@ -44,7 +49,6 @@ TcpConnection::TcpConnection(TcpServer * parent,
     d->parent = this;
     d->uv_server = data->uv_server;
     d->uv_client = data->uv_client;
-    d->uv_client->data = d;
     d->conn_data = data;
     d->read_count = 0;
 }
@@ -57,7 +61,10 @@ TcpConnection::~TcpConnection()
 void
 TcpConnection::read(QByteArray *buffer)
 {
-    d->read_buffer = buffer;
+    read_req_t *req = (read_req_t *)malloc(sizeof(read_req_t));
+    req->read_buffer = buffer;
+    req->tcpriv = d;
+    d->uv_client->data = req;
     uv_read_start((uv_stream_t *)d->uv_client,
                   &TcpConnectionPrivate::on_alloc_buffer,
                   &TcpConnectionPrivate::on_read);
@@ -107,7 +114,6 @@ uint64_t
 TcpConnection::write(const char * data, uint64_t size)
 {
     write_req_t *wr = (write_req_t *)malloc(sizeof(write_req_t));
-    wr->req.data = d;
     wr->buf = uv_buf_init((char *)malloc(size), size);
     memcpy(wr->buf.base, data, size);
     int r = uv_write(&wr->req, (uv_stream_t *)d->uv_client, &wr->buf, 1, 
@@ -119,8 +125,6 @@ void
 TcpConnectionPrivate::on_write(uv_write_t *req, int status) 
 {
 //    debug() << "Status: " << status;
-
-    TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)req->data;
 
     write_req_t *wr = (write_req_t *)req;
     free(wr->buf.base);
@@ -139,29 +143,34 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
                               ssize_t nread,
                               uv_buf_t buf)
 {
-    TcpConnectionPrivate *tcp = (TcpConnectionPrivate *)handle->data;
-    TcpServer *ts = (TcpServer *)tcp->uv_server->data;
+    read_req_t *req = (read_req_t *)handle->data;
+    TcpConnectionPrivate *tcpriv = req->tcpriv;
+    QByteArray *read_buffer = req->read_buffer;
+    TcpServer *ts = (TcpServer *)tcpriv->uv_server->data;
 
     if (nread == -1) {
         if (uv_last_error(ts->defaultLoop()->uv_loop()).code == UV_EOF) {
             debug() << "EOF: discarding connection";
-            tcp->op_status = TcpConnection::ReadFail;
+            tcpriv->op_status = TcpConnection::ReadFail;
 //            ts->closeConnection(tcp->conn_data);
         }
     }
 
     if (nread > 0) {
-        tcp->read_buffer->append(buf.base);
+        read_buffer->append(buf.base);
         uv_read_stop(handle);
-        tcp->op_status = TcpConnection::ReadOk;
+        tcpriv->op_status = TcpConnection::ReadOk;
     }
 
     if (buf.base)
         free(buf.base);
 
-    debug() << "yes";
+    free(req);
 
-    tcp->read_count++;
+    debug() << "last error" << (uv_last_error(ts->defaultLoop()->uv_loop()).code == UV_EAGAIN);
+    debug() << "status";
+
+    tcpriv->read_count++;
 //  TODO notification mechanism
 //    tcp->parent->readFinished(tcp->parent);
 }
