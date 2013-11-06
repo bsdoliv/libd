@@ -1,4 +1,4 @@
-tcpd
+echod
 .depend_local
 *.o
 **.swp

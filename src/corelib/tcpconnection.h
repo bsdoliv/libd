@@ -18,12 +18,12 @@ public:
     virtual ~TcpConnection();
     
     void read(QByteArray *buffer);
+    bool timedRead(QByteArray *buffer, int timeout = 0);
     uint64_t write(const char * data, uint64_t size);
     void close();
     QByteArray *buffer();
 
     int status();
-    bool wait(int timeout = 0);
 
     enum Status {
         ReadOk = 0,

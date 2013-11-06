@@ -4,6 +4,8 @@
 #include "tools.h"
 #include "daemon_p.h"
 
+#include <unistd.h>
+
 #define TCPCONNECTION_DEBUG
 
 #ifdef TCPCONNECTION_DEBUG
@@ -61,6 +63,46 @@ TcpConnection::read(QByteArray *buffer)
                   &TcpConnectionPrivate::on_read);
 }
 
+bool
+TcpConnection::timedRead(QByteArray *buffer, int timeout)
+{
+    uv_timer_t timer;
+    bool tmout = false;
+    // start timer
+    timer.data = &tmout;
+    uv_timer_init(uv_default_loop(), &timer);
+    uv_timer_start(&timer, &TcpConnectionPrivate::on_wait, timeout, 0);
+
+    read(buffer);
+
+//    uv_stop(uv_default_loop());
+    bool sleep = true;
+    bool rvalue = false;
+    do {
+        uv_run(uv_default_loop(), UV_RUN_ONCE);
+
+        if (d->read_count > 0) {
+            d->read_count--;
+            sleep = false;
+            rvalue = true;
+            uv_timer_stop(&timer);
+            debug() << "read";
+        }
+
+        if (tmout) {
+            debug() << "timeout";
+            sleep = false;
+            rvalue = true;
+        }
+
+        static int msec = 1;
+        usleep(msec * 1000);
+    } while (sleep);
+//    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+
+    return rvalue;
+}
+
 uint64_t
 TcpConnection::write(const char * data, uint64_t size)
 {
@@ -104,7 +146,7 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
         if (uv_last_error(ts->defaultLoop()->uv_loop()).code == UV_EOF) {
             debug() << "EOF: discarding connection";
             tcp->op_status = TcpConnection::ReadFail;
-            ts->closeConnection(tcp->conn_data);
+//            ts->closeConnection(tcp->conn_data);
         }
     }
 
@@ -116,6 +158,8 @@ TcpConnectionPrivate::on_read(uv_stream_t *handle,
 
     if (buf.base)
         free(buf.base);
+
+    debug() << "yes";
 
     tcp->read_count++;
 //  TODO notification mechanism
@@ -148,37 +192,12 @@ TcpConnection::buffer()
     return d->read_buffer;
 }
 
-bool
-TcpConnection::wait(int timeout)
-{
-    uv_loop_t *loop = uv_default_loop();
-    uv_stop(loop);
-#if 1
-    uv_timer_t idler;
-    idler.data = d;
-    uv_timer_init(loop, &idler);
-    uv_timer_start(&idler, &TcpConnectionPrivate::on_wait, 5000, 0);
-#endif
-
-    uv_run(loop, UV_RUN_DEFAULT);
-
-    if (d->read_count > 0) {
-        d->read_count--;
-        return true;
-    }
-
-    return false;
-}
-
 void 
 TcpConnectionPrivate::on_wait(uv_timer_t *handle, int status)
 {
-    static int64_t counter = 0;
-
-    if (++counter >= 10e6) {
-        uv_timer_stop(handle);
-        counter = 0;
-    }
+    bool *timeout = (bool *)handle->data;
+    *timeout = true;
+    uv_timer_stop(handle);
 }
 
 D_END_NAMESPACE

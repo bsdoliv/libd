@@ -24,11 +24,11 @@ Echod::newConnection(TcpConnection *c)
 {
     debug() << "new connection";
     QByteArray *m_buffer = new QByteArray;
-    c->read(m_buffer); 
-    debug() << "waiting" << c->wait();
+    c->timedRead(m_buffer, 5000); 
 
 //    QByteArray *m_buffer = c->buffer();
     if (c->status() != TcpConnection::ReadOk) {
+        debug() << "read failed";
         c->close();
         delete c;
         delete m_buffer;
