@@ -123,5 +123,7 @@ Misc Resources
         http://bxr.su/NetBSD/share/mk/bsd.README
         www.freebsd.org/doc/en/books/pmake/book.html
 
+    * thread runner
+        http://docs.kdab.com/kdtools/2.2.1/kdthreadrunner_8h-source.html
 
 # vim: set ts=4 sw=4 et:
