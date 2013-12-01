@@ -1,3 +1,4 @@
+#include "qconfig_private.h"
 #include "qstring.h"
 #include "qchar.h"
 #include "qdebug.h"

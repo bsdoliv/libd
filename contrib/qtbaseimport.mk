@@ -228,6 +228,7 @@ import-sources: .PHONY
 		-e "s:^#include.*c89/qplatformdefs.*::g" \
 		>> qplatformdefs.h
 
+
 .else
 import-sources: .PHONY
 	@echo "QTBASEDIR undefined"
@@ -239,7 +240,7 @@ _SRCS=${SOURCES:T}
 _SRCS:=${_SRCS:S/${_e}//}
 .endfor
 
-qt.mk: ${SOURCES:T} ${HEADERS:T} qfeatures.h Qt
+qt.mk: ${SOURCES:T} ${HEADERS:T} qfeatures.h qconfig_private.h Qt
 	-rm -f ${.TARGET}
 	echo ".PATH: ${.CURDIR}" >> ${.TARGET}
 	echo "SRCS= ${SOURCES_API:T}" >> ${.TARGET}
@@ -247,21 +248,9 @@ qt.mk: ${SOURCES:T} ${HEADERS:T} qfeatures.h Qt
 	echo "FILES+= qt.h" >> ${.TARGET}
 	echo "FILES+= Qt" >> ${.TARGET}
 	echo "FILES+= qfeatures.h" >> ${.TARGET}
+	echo "FILES+= qconfig_private.h" >> ${.TARGET}
 	echo "CXXFLAGS+= -I." >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_THREAD" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_QOBJECT" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_CODECS" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_UNICODETABLES" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_DATASTREAM" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_TRANSLATION" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_BOOTSTRAPPED" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_LITE_UNICODE" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_CAST_TO_ASCII" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_LIBRARY" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_SYSTEMLOCALE" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_TRANSLATION" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_QMAKE_LOCATION" >> ${.TARGET}
-	echo "CXXFLAGS+= -DQT_NO_CAST_FROM_ASCII" >> ${.TARGET}
+	echo "CXXFLAGS+= -include qconfig_private.h" >> ${.TARGET}
 
 DEFINES += \
     $$MODULE_DEFINES \
@@ -272,8 +261,29 @@ DEFINES += \
 qfeatures.h:
 	echo > ${.TARGET}
 
+qconfig_private.h:
+	-rm -f ${.TARGET}
+	echo "#ifndef QCONFIG_PRIVATE_H" >> ${.TARGET}
+	echo "#define QCONFIG_PRIVATE_H" >> ${.TARGET}
+	echo "#define QT_NO_THREAD" >> ${.TARGET}
+	echo "#define QT_NO_QOBJECT" >> ${.TARGET}
+	echo "#define QT_NO_CODECS" >> ${.TARGET}
+	echo "#define QT_NO_UNICODETABLES" >> ${.TARGET}
+	echo "#define QT_NO_DATASTREAM" >> ${.TARGET}
+	echo "#define QT_NO_TRANSLATION" >> ${.TARGET}
+	echo "#define QT_BOOTSTRAPPED" >> ${.TARGET}
+	echo "#define QT_LITE_UNICODE" >> ${.TARGET}
+	echo "#define QT_NO_CAST_TO_ASCII" >> ${.TARGET}
+	echo "#define QT_NO_LIBRARY" >> ${.TARGET}
+	echo "#define QT_NO_SYSTEMLOCALE" >> ${.TARGET}
+	echo "#define QT_NO_TRANSLATION" >> ${.TARGET}
+	echo "#define QT_QMAKE_LOCATION" >> ${.TARGET}
+	echo "#define QT_NO_CAST_FROM_ASCII" >> ${.TARGET}
+	echo "#endif //! QCONFIG_PRIVATE_H" >> ${.TARGET}
+
 qt.h: ${HEADERS_API:T}
 	rm ${.TARGET}
+	echo '#include "qconfig_private.h"' >> ${.TARGET}
 .for _h in ${HEADERS_API:T}
 	echo '#include "${_h}"' >> ${.TARGET}
 .endfor

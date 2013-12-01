@@ -1,0 +1,6 @@
+importing qt
+    % cd qtbase
+    % QTBASEDIR=~/space/qt-everywhere-opensource-src-5.1.1/qtbase \
+        bmake -f ../qtbaseimport.mk import
+building qt 
+    % bmake -j 2 && bmake install 
