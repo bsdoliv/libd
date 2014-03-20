@@ -3,7 +3,9 @@
 .include "../Makefile.inc"
 .include "${ABSTOP}/mk/cpp.mk"
 
+.if (${HOST_OS} != "OpenBSD")
 CXXFLAGS+=	-std=c++0x
+.endif
 LDSTATIC=	-static
 LIB=		qt
 

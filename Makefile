@@ -6,7 +6,7 @@ distrib: .PHONY
 	mkdir -p ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${INCLUDEDIR}/qt
 
 distclean clean: .PHONY
-	rm -rfv ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${DEST_DIR}
+	rm -rf ${BINDIR} ${LIBDIR} ${INCLUDEDIR} ${DEST_DIR}
 	cd ${.CURDIR}/contrib/libuv && ${.MAKE} ${.TARGET}
 	cd ${.CURDIR}/contrib/qtbase && ${.MAKE} ${.TARGET}
 	cd ${.CURDIR}/src/corelib && ${.MAKE} ${.TARGET}

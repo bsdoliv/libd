@@ -6,6 +6,7 @@ FILES= 			libuv.a
 FILESMODE_libuv.a= 	600
 FILESDIR_libuv.a=	${LIBDIR}
 FILESNAME_libuv.a !=	id -u -n
+FILESOWN!=		id -u -n
 
 build: .PHONY all
 
